@@ -1,0 +1,20 @@
+<launch>
+
+<!--Determining (x,y) coordinates of the ball  -->
+<node pkg="mbk_ardupilot_drone" type="droneCameraCV_ballLocation.py" 
+  
+    name="Ball_Location_mbk" output="screen" >
+</node>
+
+<!--This will execute the python code written by MBK, It will perform two tasks:
+1)  set the different flight modes for the Quadcopter i.e. GUIDED, ARM and TAKEOFF
+2)  Implement a ball tracking PID Controller 
+-->
+<node pkg="mbk_ardupilot_drone" type="BallTracking_pidControl_ARDUPILOT_MBK.py" 
+  
+    name="MBK_Set_Flight_Modes_and_Tracking_PID_COntroller" output="screen" >
+</node>
+
+
+ 
+</launch>

@@ -1,0 +1,37 @@
+<launch>
+
+<!--Waypoint navigation using Python script  -->
+<!--
+<node pkg="mbk_ardupilot_drone" type="waypoint_navigation_square.py" 
+  
+    name="Quadcopter_Navigation" output="screen" >
+</node>
+-->
+
+<!--Determining (x,y) coordinates of the Water Reservoir and Water Discharge Location  -->
+
+<node pkg="mbk_ardupilot_drone" type="droneCameraCV_WaterLocation.py" 
+  
+    name="Water_Location_mbk" output="screen" >
+</node>
+
+
+
+
+
+
+
+<!--This will execute the python code written by MBK, It will perform two tasks:
+1)  set the different flight modes for the Quadcopter i.e. GUIDED, ARM and TAKEOFF
+2)  Implement a ball tracking PID Controller 
+-->
+
+
+<node pkg="mbk_ardupilot_drone" type="WaterTracking_pidControl_ARDUPILOT_MBK.py" 
+  
+    name="MBK_Set_Flight_Modes_and_Tracking_PID_COntroller" output="screen" >
+</node>
+
+
+ 
+</launch>

@@ -1,0 +1,17 @@
+<launch>
+
+<!--Waypoint navigation using Python script  -->
+<node pkg="mbk_ardupilot_drone" type="waypoint_navigation_mission_01.py" 
+  
+    name="Quadcopter_Navigation" output="screen" >
+</node>
+
+<!--For generating path of the quadcopter in RVIZ by using Python script  -->
+<node pkg="mbk_ardupilot_drone" type="Generate_Trajectory_In_RVIZ.py" 
+  
+    name="Generating_Trajectory" output="screen" >
+</node>
+
+
+
+</launch>

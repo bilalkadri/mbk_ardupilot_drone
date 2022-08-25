@@ -1,0 +1,37 @@
+<launch>
+
+<!--Launching all the parameters from a YAML file -->
+ <rosparam file="$(find mbk_ardupilot_drone)/config/setup.yaml" />
+
+
+<!--Waypoint navigation using Python script  -->
+<node pkg="mbk_ardupilot_drone" type="waypoint_navigation_mission_03.py" 
+  
+    name="Quadcopter_Navigation" output="screen" >
+</node>
+
+
+
+<!--For generating path of the quadcopter in RVIZ by using Python script  -->
+<node pkg="mbk_ardupilot_drone" type="Generate_Trajectory_In_RVIZ.py" 
+  
+    name="Generating_Trajectory" output="screen" >
+</node>
+
+
+<!--Determining (x,y) coordinates of the Water Reservoir and Water Discharge Location  -->
+
+<node pkg="mbk_ardupilot_drone" type="droneCameraCV_WaterLocation_Mission_03.py" 
+  
+    name="Water_Location_mbk" output="screen" >
+</node>
+
+
+<!--PID Controller for Picking and Dropping Water-->
+<node pkg="mbk_ardupilot_drone" type="WaterTracking_pidControl_ARDUPILOT_Mission_03.py" 
+                                      
+    name="MBK_Set_Flight_Modes_and_Tracking_PID_COntroller" output="screen" >
+</node>
+
+
+</launch>

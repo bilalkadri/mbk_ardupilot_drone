@@ -1,0 +1,23 @@
+
+    rospy.wait_for_service('/mavros/set_mode')
+    try:
+         flightModeService = rospy.ServiceProxy('/mavros/set_mode', mavros_msgs.srv.SetMode)
+         #http://wiki.ros.org/mavros/CustomModes for custom modes
+         isModeChanged = flightModeService(custom_mode='GUIDED') #return true or false
+    except rospy.ServiceException, e:
+         print "service set_mode call failed: %s. GUIDED Mode could not be set. Check that GPS is enabled"%e
+        
+    rospy.wait_for_service('/mavros/cmd/arming')
+    try:
+         armService = rospy.ServiceProxy('/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
+         armService(True)
+    except rospy.ServiceException, e:
+         print "Service arm call failed: %s"%e
+
+    rospy.wait_for_service('/mavros/cmd/takeoff')
+    try:
+         takeoffService = rospy.ServiceProxy('/mavros/cmd/takeoff', mavros_msgs.srv.CommandTOL) 
+         takeoffService(altitude = 2, latitude = 0, longitude = 0, min_pitch = 0, yaw = 0)
+    except rospy.ServiceException, e:
+         print "Service takeoff call failed: %s"%e   
+
