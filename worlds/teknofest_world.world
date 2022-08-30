@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<sdf version="1.5">
+	<world name="default">
+		<!-- A global light source -->
+		<include>
+			<uri>model://sun</uri>
+			<!-- <pose>0 0 100 0 0 0</pose> -->
+		</include>
+
+		<!-- A ground plane -->
+		<!-- <include>
+			<uri>model://ground_plane</uri>
+		</include> -->
+
+		<!-- Teknofest Ground -->
+		<include>
+			<uri>model://teknofest_ground</uri>
+			<pose>0 0 0 0 0 0</pose>
+		</include>
+
+		<!-- Teknofest Water Intake Reservoir -->
+		<include>
+			<uri>model://water_intake_reservoir</uri>
+			<pose>60 -20 0 1.571 0 1.571</pose>
+		</include>
+
+		<!-- Teknofest Water Release Target -->
+		<include>
+			<uri>model://water_release_target</uri>
+			<pose>0 40 0 1.571 0 1.571</pose>
+		</include>
+
+		<!-- Teknofest Poles -->
+		<include>
+			<uri>model://poles</uri>
+			<name>pole1</name>
+			<pose> -40 0 0 0 0 0</pose>
+		</include>
+
+		<include>
+			<uri>model://poles</uri>
+			<name>pole2</name>
+			<pose>40 0 0 0 0 0</pose>
+		</include>
+
+		<!-- IRIS Drone -->
+		<model name="iris">
+      		<include>
+        		<uri>model://drone_with_camera</uri>
+      		</include>
+      		<pose> 0 -50 0 0 0 0</pose>
+    	</model>
+
+	</world>
+</sdf>
