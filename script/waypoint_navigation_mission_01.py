@@ -5,6 +5,7 @@ import rospy
 from iq_gnc.py_gnc_functions import *
 # To print colours (optional).
 from iq_gnc.PrintColours import *
+import math
 
 
 def main():
@@ -28,7 +29,7 @@ def main():
 
    
     # Specify some waypoints
-    goals = [[0, 0, 3, 0], 
+    goals = [[0, 0, 3, math.pi/2], 
              [40, 0, 3, 0], 
              [50, 1.63, 3, 0],
              [65, 12, 3, 0], 
