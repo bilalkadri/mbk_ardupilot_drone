@@ -212,21 +212,20 @@ def main():
     vehicle = connect(connection_string, wait_ready=True, baud=921600)
     print("Connection Successfully Established!")    
 
-    # wp1 = LocationGlobalRelative(24.7944609, 67.1353376, 5)
     print("Starting Takeoff")
     
     print('Create a new mission (for current location)')
     adds_square_mission(vehicle.location.global_frame,50)
-
-
-    # From Copter 3.3 you will be able to take off using a mission item. Plane must take off using a mission item (currently).
+   
     arm_and_takeoff(10)
 
     print("Starting mission")
     # Reset mission set to first (0) waypoint
     vehicle.commands.next=0
 
-    # Set mode to AUTO to start mission
+    # Set mode to AUTO to start mission 
+    #Question by MBK
+    #Why the mode has been set to AUTO??
     vehicle.mode = VehicleMode("AUTO")
 
 
