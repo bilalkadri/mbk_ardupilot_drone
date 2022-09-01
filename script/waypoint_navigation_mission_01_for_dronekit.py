@@ -105,7 +105,7 @@ def distance_to_current_waypoint():
     alt = missionitem.z
     targetWaypointLocation = LocationGlobalRelative(lat,lon,alt)
     distancetopoint = get_distance_metres(vehicle.location.global_frame, targetWaypointLocation)
-    return 
+    return distancetopoint
 
 def get_location_metres(original_location, dNorth, dEast):
     """
@@ -238,9 +238,9 @@ def main():
         nextwaypoint=vehicle.commands.next
         print('Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint()))
     
-        if nextwaypoint==3: #Skip to next waypoint
-            print('Skipping to Waypoint 5 when reach waypoint 3')
-            vehicle.commands.next = 5
+        # if nextwaypoint==3: #Skip to next waypoint
+        #     print('Skipping to Waypoint 5 when reach waypoint 3')
+        #     vehicle.commands.next = 5
         if nextwaypoint==5: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
             print("Exit 'standard' mission when start heading to final waypoint (5)")
             break;
