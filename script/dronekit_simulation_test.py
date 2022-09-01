@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from __future__ import print_function
 
 from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
@@ -32,6 +34,8 @@ def set_destination(lat, lon, alt, wp_index):
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
     print("Reached Waypoint {0}".format(wp_index))
+
+
     time.sleep(1)
 
 def goto_position_target_global_int(aLocation):
@@ -42,6 +46,10 @@ def goto_position_target_global_int(aLocation):
 
     See the above link for information on the type_mask (0=enable, 1=ignore). 
     At time of writing, acceleration and yaw bits are ignored.
+
+    ------------------Coments by MBK----------------------
+    This code runs on the actual UAV, we cannot use this code in Gazeo yet
+    ----------------------------------------------------------
     """
     msg = vehicle.message_factory.set_position_target_global_int_encode(
         0,       # time_boot_ms (not used)
@@ -133,6 +141,10 @@ if __name__ == '__main__':
 
     print("Starting Python Waypoint Navigation")
     set_destination(-35.3632188, 149.1658468, 5, 1)       #Arguments: latitutde, longitude, relative altitude, waypoint number
+    # vehicle.simple_goto(LocationGlobalRelative(-35.3632188, 149.1658468, 5))
+    time.sleep(10)
+    
+    set_destination(-35.3632168, 149.1658448, 5, 2)       #Arguments: latitutde, longitude, relative altitude, waypoint number
     # vehicle.simple_goto(LocationGlobalRelative(-35.3632188, 149.1658468, 5))
     time.sleep(20)
 

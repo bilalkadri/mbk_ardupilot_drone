@@ -59,13 +59,14 @@ def main():
         condition=(not Water_Reservoir_Location_Detected_local_variable) and  (not Water_Discharge_Location_Detected_local_variable) 
         #condition= 1 and 1
         #print('If condition result',condition)
-        
+        rate1 = rospy.Rate(0.1) # ROS Rate at 5Hz
         if condition:
             drone.set_destination(
                 x=goals[i][0], y=goals[i][1], z=goals[i][2], psi=goals[i][3])
             rate.sleep()
             if drone.check_waypoint_reached():
                 i += 1
+                rate1.sleep()
 
         
     # Land after all waypoints is reached.
