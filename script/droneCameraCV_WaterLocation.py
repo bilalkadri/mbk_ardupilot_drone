@@ -17,7 +17,7 @@ import imutils
 from collections import deque
 
 
-sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
+# sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
 
 
 # define range of blue color in HSV
@@ -59,7 +59,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         cv_image_red = bridge.imgmsg_to_cv2(img_msg, "passthrough")
         cv_image_blue = bridge.imgmsg_to_cv2(img_msg, "passthrough")
          
-    except CvBridgeError, e:
+    except CvBridgeError as e:
         print('There is some error')
         #rospy.logerr("CvBridge Error: {0}".format(e))
 
@@ -152,17 +152,17 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 		# it to compute the minimum enclosing circle and
 		# centroid
         
-    	c_red = max(cnts_red, key=cv2.contourArea)
-    	((x_red, y_red), radius_red) = cv2.minEnclosingCircle(c_red)
+        c_red = max(cnts_red, key=cv2.contourArea)
+        ((x_red, y_red), radius_red) = cv2.minEnclosingCircle(c_red)
         boundRect_red = cv2.boundingRect(c_red)
         
         #print x,y,radius
-    	M = cv2.moments(c_red)
-    	center_red = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        print('Centroid of the Contour=({0},{1})'.format(center_red[0],center_red[1]))
+        M = cv2.moments(c_red)
+        center_red = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        # print('Centroid of the Contour=({0},{1})'.format(center_red[0],center_red[1]))
         
 		# only proceed if the radius meets a minimum size
-    	if radius_red > 100:
+        if radius_red > 10:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
@@ -197,20 +197,20 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 		# it to compute the minimum enclosing circle and a bounding rectangle
 		
         
-    	c_blue = max(cnts_blue, key=cv2.contourArea)
-    	((x_blue, y_blue), radius_blue) = cv2.minEnclosingCircle(c_blue)
+        c_blue = max(cnts_blue, key=cv2.contourArea)
+        ((x_blue, y_blue), radius_blue) = cv2.minEnclosingCircle(c_blue)
         #print x,y,radius
-        print('Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_blue,y_blue,radius_blue))
-        print('Area of the min enclosing circle A={0}'.format(cv2.contourArea(c_blue)))
+        # print('Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_blue,y_blue,radius_blue))
+        # print('Area of the min enclosing circle A={0}'.format(cv2.contourArea(c_blue)))
         boundRect_blue = cv2.boundingRect(c_blue)
          
 
         
-    	M = cv2.moments(c_blue)
-    	center_blue = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
+        M = cv2.moments(c_blue)
+        center_blue = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        # print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
 		# only proceed if the radius meets a minimum size
-    	if radius_blue > 100:
+        if radius_blue > 10:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
@@ -238,25 +238,25 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     for i in range(1, len(pts_red)):
 		# if either of the tracked points are None, ignore
 		# them
-		if pts_red[i - 1] is None or pts_red[i] is None:
-			continue
+        if pts_red[i - 1] is None or pts_red[i] is None:
+            continue
 
 		# draw the connecting lines
 
-		thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
-		cv2.line(cv_image_red, pts_red[i - 1], pts_red[i], (150, 150,150), thickness)
+        thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
+        cv2.line(cv_image_red, pts_red[i - 1], pts_red[i], (150, 150,150), thickness)
 
 	# loop over the set of tracked BLUE points
     for i in range(1, len(pts_blue)):
 		# if either of the tracked points are None, ignore
 		# them
-		if pts_blue[i - 1] is None or pts_blue[i] is None:
-			continue
+        if pts_blue[i - 1] is None or pts_blue[i] is None:
+            continue
 
 		# draw the connecting lines
 
-		thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
-		cv2.line(cv_image_blue, pts_blue[i - 1], pts_blue[i], (150, 150, 150), thickness)
+        thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
+        cv2.line(cv_image_blue, pts_blue[i - 1], pts_blue[i], (150, 150, 150), thickness)
 
 
 

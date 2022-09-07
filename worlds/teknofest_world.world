@@ -22,13 +22,13 @@
 		<!-- Teknofest Water Intake Reservoir -->
 		<include>
 			<uri>model://water_intake_reservoir</uri>
-			<pose>60 -20 0 1.571 0 1.571</pose>
+			<pose>4.64 -22.19 0 1.571 0 1.571</pose>
 		</include>
 
 		<!-- Teknofest Water Release Target -->
 		<include>
 			<uri>model://water_release_target</uri>
-			<pose>0 40 0 1.571 0 1.571</pose>
+			<pose>39 10 0 1.571 0 1.571</pose>
 		</include>
 
 		<!-- Teknofest Poles -->
@@ -45,11 +45,11 @@
 		</include>
 
 		<!-- IRIS Drone -->
-		<model name="iris">
+		<model name="iris_TEKNOFEST">
       		<include>
         		<uri>model://drone_with_camera</uri>
       		</include>
-      		<pose> 0 -50 0 0 0 0</pose>
+      		<pose> 0 0 0 0 0 0</pose>
     	</model>
 
 	</world>

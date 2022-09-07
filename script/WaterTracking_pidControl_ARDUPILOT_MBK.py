@@ -191,7 +191,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
     X_Error= setPointX-currentX       #Remember these errors are caluclated in the image frame of reference where
     Y_Error= setPointY-currentY       #(x,y) is the top left corner
    
-    Z_Error=Z_position-2 #Setpoint in z-direction for Quadcopter is 2m
+    Z_Error=Z_position-2 #Setpoint in z-direction for Quadcopter is 5m
 
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
@@ -244,9 +244,9 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
         #  -------------------------------------
         Water_Sucked_by_Syringes_local_variable=rospy.get_param('Water_Sucked_by_Syringes')
 
-        if distance_to_center > 10:
-            twist.twist.linear.x=0.05*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.y=0.05*controller_y.set_current_error(Y_Error)
+        if distance_to_center > 50:
+            twist.twist.linear.x=0.09*controller_x.set_current_error(-X_Error)
+            twist.twist.linear.y=0.09*controller_y.set_current_error(Y_Error)
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
             print('Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
 
@@ -255,15 +255,17 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             twist.twist.angular.z=0 #controller_yaw.set_current_error(depth_Error)
         
         
-        elif distance_to_center <10:
+        elif distance_to_center <50:
 
-            twist.twist.linear.x=0.05*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.y=0.05*controller_y.set_current_error(Y_Error)
-            if Z_Error>0.1 and not(Water_Sucked_by_Syringes_local_variable):
-                twist.twist.linear.z=-10*controller_z.set_current_error(Z_Error)
+            twist.twist.linear.x=0.09*controller_x.set_current_error(-X_Error)
+            twist.twist.linear.y=0.09*controller_y.set_current_error(Y_Error)
+            print('Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
+
+            if Z_Error>1 and not(Water_Sucked_by_Syringes_local_variable):
+                twist.twist.linear.z=-1*controller_z.set_current_error(Z_Error)
                 print('My Z_Error is greater than 0.1 and my z-position is=',Z_position)
             
-            elif Z_Error>0 and Z_Error <=0.1 and not(Water_Sucked_by_Syringes_local_variable):
+            elif Z_Error>0 and Z_Error <=1 and not(Water_Sucked_by_Syringes_local_variable):
                 time.sleep(5)
                 #twist.twist.linear.z=-10*controller_z.set_current_error(0) #hold the altitude
                 rospy.set_param("/Water_Sucked_by_Syringes",1)
@@ -271,13 +273,13 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
                 print('I am sucking the water')
 
                 #I have to move back the quadcopter to the previous height
-            if (3-Z_position)>0.1 and Water_Sucked_by_Syringes_local_variable:
-                twist.twist.linear.z=10*controller_z.set_current_error(3-Z_position)
-                print('I am rising')
+            if (5-Z_position)>0.1 and Water_Sucked_by_Syringes_local_variable:
+                twist.twist.linear.z=1*controller_z.set_current_error(5-Z_position)
+                print('I am rising, my Z_position is :',Z_position)
                 
                          
             
-            print('Cond 2,Z position = {0} Z error ={1}  Euclidean distance = {2}'.format(Z_position,Z_Error, distance_to_center))
+            # print('Cond 2,Z position = {0} Z error ={1}  Euclidean distance = {2}'.format(Z_position,Z_Error, distance_to_center))
 
           
             twist.twist.angular.x=0

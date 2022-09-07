@@ -1,6 +1,9 @@
 #! /usr/bin/env python
-
 from __future__ import print_function
+# Import ROS.
+import rospy
+# Import the API.
+
 
 from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
 import time
@@ -16,6 +19,17 @@ import rospy
 
 takeoff_alt = 5
 
+def dist_between_global_coordinates(aLocation1, aLocation2):
+    # This formula has been copied from HEIFU project's repository. Link: https://gitlab.pdmfc.com/drones/ros1/heifu/-/blob/master/heifu_interface/formulas.py
+    R = 6371e3; #in meters
+    latitude1 = math.radians(aLocation1.lat)
+    latitude2 = math.radians(aLocation2.lat)
+    latitudevariation = math.radians((aLocation2.lat-aLocation1.lat))
+    longitudevariation = math.radians((aLocation2.lon-aLocation1.lon))
+    a = math.sin(latitudevariation/2) * math.sin(latitudevariation/2) + math.cos(latitude1) * math.cos(latitude2) * math.sin(longitudevariation/2) * math.sin(longitudevariation/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    distance = R * c #in meters
+    return distance
 
 def set_destination(lat, lon, alt, wp_index):
 
@@ -30,65 +44,13 @@ def set_destination(lat, lon, alt, wp_index):
     dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
     while dist_to_wp > 10:
-        print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
+        # print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
     print("Reached Waypoint {0}".format(wp_index))
 
 
     time.sleep(1)
-
-def goto_position_target_global_int(aLocation):
-    """
-    Send SET_POSITION_TARGET_GLOBAL_INT command to request the vehicle fly to a specified LocationGlobal.
-
-    For more information see: https://pixhawk.ethz.ch/mavlink/#SET_POSITION_TARGET_GLOBAL_INT
-
-    See the above link for information on the type_mask (0=enable, 1=ignore). 
-    At time of writing, acceleration and yaw bits are ignored.
-
-    ------------------Coments by MBK----------------------
-    This code runs on the actual UAV, we cannot use this code in Gazeo yet
-    ----------------------------------------------------------
-    """
-    msg = vehicle.message_factory.set_position_target_global_int_encode(
-        0,       # time_boot_ms (not used)
-        0, 0,    # target system, target component
-        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT, # frame
-        0b0000111111111000, # type_mask (only speeds enabled)
-        aLocation.lat*1e7, # lat_int - X Position in WGS84 frame in 1e7 * meters
-        aLocation.lon*1e7, # lon_int - Y Position in WGS84 frame in 1e7 * meters
-        aLocation.alt, # alt - Altitude in meters in AMSL altitude, not WGS84 if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
-        0, # X velocity in NED frame in m/s
-        0, # Y velocity in NED frame in m/s
-        0, # Z velocity in NED frame in m/s
-        0, 0, 0, # afx, afy, afz acceleration (not supported yet, ignored in GCS_Mavlink)
-        0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
-    # send command to vehicle
-    vehicle.send_mavlink(msg)
-
-def get_distance_metres(aLocation1, aLocation2):
-    """
-    Returns the ground distance in metres between two LocationGlobal objects.
-    This method is an approximation, and will not be accurate over large distances and close to the 
-    earth's poles. It comes from the ArduPilot test code: 
-    https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
-    """
-    dlat = aLocation2.lat - aLocation1.lat
-    dlong = aLocation2.lon - aLocation1.lon
-    return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
-
-def dist_between_global_coordinates(aLocation1, aLocation2):
-    # This formula has been copied from HEIFU project's repository. Link: https://gitlab.pdmfc.com/drones/ros1/heifu/-/blob/master/heifu_interface/formulas.py
-    R = 6371e3; #in meters
-    latitude1 = math.radians(aLocation1.lat)
-    latitude2 = math.radians(aLocation2.lat)
-    latitudevariation = math.radians((aLocation2.lat-aLocation1.lat))
-    longitudevariation = math.radians((aLocation2.lon-aLocation1.lon))
-    a = math.sin(latitudevariation/2) * math.sin(latitudevariation/2) + math.cos(latitude1) * math.cos(latitude2) * math.sin(longitudevariation/2) * math.sin(longitudevariation/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    distance = R * c #in meters
-    return distance
 
 
 def arm_and_takeoff(aTargetAltitude):
@@ -124,8 +86,14 @@ def arm_and_takeoff(aTargetAltitude):
             break
         time.sleep(1)
 
-if __name__ == '__main__':
 
+def main():
+    # Initializing ROS node.
+    rospy.init_node("Waypoint_Navigation", anonymous=True)
+
+ 
+    # Specify control loop rate. We recommend a low frequency to not over load the FCU with messages. Too many messages will cause the drone to be sluggish.
+    rate = rospy.Rate(3)
     global vehicle
 
     # Connect to the Vehicle
@@ -143,7 +111,7 @@ if __name__ == '__main__':
     # set_destination(-35.3632188, 149.1658468, 5, 1)       #Arguments: latitutde, longitude, relative altitude, waypoint number
     set_destination(24.7944000, 67.1352048,5,1)
     # vehicle.simple_goto(LocationGlobalRelative(-35.3632188, 149.1658468, 5))
-    time.sleep(10)
+    time.sleep(2)
     
     #Waypoints for moving the quad in a rectangle , KIET's cricket ground
     # 1) 24.7944000	67.1352048	12.000000
@@ -154,15 +122,31 @@ if __name__ == '__main__':
     # 6) 24.79439520	67.13516730	10.000000
 
     set_destination(24.79439760,67.13521150,5,2)
-    time.sleep(10)
+    time.sleep(2)
     set_destination(24.794442070,67.13542070,5,3)
-    time.sleep(10)
+    time.sleep(2)
     set_destination(24.79477870,67.13535640,5,4)
-    time.sleep(10)
+    time.sleep(2)
     set_destination(24.79475190,67.13510290,5,5)
-    time.sleep(10)
+    time.sleep(2)
     set_destination(24.79439520,67.13516730,5,6)
-    time.sleep(10)
+    time.sleep(2)
+
+    rospy.set_param('/Lap_Count', 2)
+
+
+    set_destination(24.7944000, 67.1352048,5,1)
+    time.sleep(2)
+    set_destination(24.79439760,67.13521150,5,2)
+    time.sleep(2)
+    set_destination(24.794442070,67.13542070,5,3)
+    time.sleep(2)
+    set_destination(24.79477870,67.13535640,5,4)
+    time.sleep(2)
+    set_destination(24.79475190,67.13510290,5,5)
+    time.sleep(2)
+    set_destination(24.79439520,67.13516730,5,6)
+    time.sleep(2)
 
     print('Completed all Waypoints! Returning to launch')
     vehicle.mode = VehicleMode("RTL")
@@ -171,3 +155,57 @@ if __name__ == '__main__':
     #Close vehicle object before exiting script
     print("Close vehicle object")
     vehicle.close()
+
+   
+    # # Specify some waypoints
+    # goals = [[ 0, 0, 3, 0], 
+    #          [ 5, 0, 3, 0], 
+    #          [ 5, 5, 3, 0],
+    #          [-5, 5, 3, 0], 
+    #          [-5, 0, 3, 0], 
+    #          [ 0, 0, 3, 0], 
+    #          [ 5, 0, 3, 0], 
+    #          [ 5, 5, 3, 0],
+    #          [-5, 5, 3, 0], 
+    #          [-5, 0, 3, 0], 
+    #          [ 0, 0, 3, 0]
+             
+    #          ]
+
+    # i = 0
+
+    
+    # while i < len(goals):
+
+    #     lap_counter = rospy.get_param('/Lap_Count')
+    #     #print('Lap Count=',lap_counter)
+    #     Water_Reservoir_Location_Detected_local_variable=rospy.get_param('/Water_Reservoir_Location_Detected')
+    #     Water_Discharge_Location_Detected_local_variable=rospy.get_param('/Water_Discharge_Location_Detected')
+    #     #rospy.loginfo('Water Reservoir',Water_Reservoir_Location_Detected_local_variable)
+        
+    #     if i>len(goals)/2:
+    #         rospy.set_param('/Lap_Count', 2)
+        
+    #     condition=(not Water_Reservoir_Location_Detected_local_variable) and  (not Water_Discharge_Location_Detected_local_variable) 
+    #     #condition= 1 and 1
+    #     #print('If condition result',condition)
+    #     rate1 = rospy.Rate(0.1) # ROS Rate at 5Hz
+    #     if condition:
+    #         drone.set_destination(
+    #             x=goals[i][0], y=goals[i][1], z=goals[i][2], psi=goals[i][3])
+    #         rate.sleep()
+    #         if drone.check_waypoint_reached():
+    #             i += 1
+    #             rate1.sleep()
+
+        
+    # Land after all waypoints is reached.
+    # drone.land()
+    # rospy.loginfo(CGREEN2 + "All waypoints reached landing now." + CEND)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit()
