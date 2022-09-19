@@ -28,7 +28,8 @@
 		<!-- Teknofest Water Release Target -->
 		<include>
 			<uri>model://water_release_target</uri>
-			<pose>39 10 0 1.571 0 1.571</pose>
+			<pose>59 10 0 1.571 0 1.571</pose>
+			<!--<pose>39 10 0 1.571 0 1.571</pose>-->
 		</include>
 
 		<!-- Teknofest Poles -->

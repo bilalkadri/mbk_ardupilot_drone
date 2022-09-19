@@ -33,6 +33,7 @@ def set_destination(lat, lon, alt, wp_index):
         print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
+    print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
     print("Reached Waypoint {0}".format(wp_index))
 
 
@@ -143,7 +144,7 @@ if __name__ == '__main__':
     # set_destination(-35.3632188, 149.1658468, 5, 1)       #Arguments: latitutde, longitude, relative altitude, waypoint number
     set_destination(24.7944000, 67.1352048,5,1)
     # vehicle.simple_goto(LocationGlobalRelative(-35.3632188, 149.1658468, 5))
-    time.sleep(10)
+    time.sleep(1)
     
     #Waypoints for moving the quad in a rectangle , KIET's cricket ground
     # 1) 24.7944000	67.1352048	12.000000
@@ -162,7 +163,7 @@ if __name__ == '__main__':
     set_destination(24.79475190,67.13510290,5,5)
     time.sleep(10)
     set_destination(24.79439520,67.13516730,5,6)
-    time.sleep(10)
+    time.sleep(1)
 
     print('Completed all Waypoints! Returning to launch')
     vehicle.mode = VehicleMode("RTL")

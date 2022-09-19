@@ -154,6 +154,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         
         c_red = max(cnts_red, key=cv2.contourArea)
         ((x_red, y_red), radius_red) = cv2.minEnclosingCircle(c_red)
+        # print('RED:Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_red,y_red,radius_red))
+       
         boundRect_red = cv2.boundingRect(c_red)
         
         #print x,y,radius
@@ -200,7 +202,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         c_blue = max(cnts_blue, key=cv2.contourArea)
         ((x_blue, y_blue), radius_blue) = cv2.minEnclosingCircle(c_blue)
         #print x,y,radius
-        # print('Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_blue,y_blue,radius_blue))
+        # print('BLUE: Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_blue,y_blue,radius_blue))
         # print('Area of the min enclosing circle A={0}'.format(cv2.contourArea(c_blue)))
         boundRect_blue = cv2.boundingRect(c_blue)
          
