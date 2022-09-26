@@ -13,10 +13,10 @@
 
 
 <!--For generating path of the quadcopter in RVIZ by using Python script  -->
-<node pkg="mbk_ardupilot_drone" type="Generate_Trajectory_In_RVIZ.py" 
+<!--<node pkg="mbk_ardupilot_drone" type="Generate_Trajectory_In_RVIZ.py" 
   
     name="Generating_Trajectory" output="screen" >
-</node>
+</node> -->
 
 
 <!-- Determining (x,y) coordinates of the Water Reservoir and Water Discharge Location -->
