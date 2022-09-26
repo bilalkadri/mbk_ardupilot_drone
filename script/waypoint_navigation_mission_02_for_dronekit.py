@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
-from pickle import TRUE
+from inspect import FullArgSpec
+from pickle import FALSE, TRUE
 # Import ROS.
 import rospy
 # Import the API.
@@ -35,7 +36,7 @@ def dist_between_global_coordinates(aLocation1, aLocation2):
 def set_destination(lat, lon, alt, wp_index):
 
     global vehicle
-
+    rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',1)
     print("Moving to Waypoint {0}".format(wp_index))
     
     aLocation = LocationGlobalRelative(lat, lon, float(alt))
@@ -49,7 +50,7 @@ def set_destination(lat, lon, alt, wp_index):
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
     print("Reached Waypoint {0}".format(wp_index))
-
+    rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',0)
 
     time.sleep(1)
 
@@ -59,7 +60,7 @@ def check_waypoint_reached(lat, lon, alt, wp_index):
 
     global vehicle
 
-    print("I am in checked waypoint {0} reached function".format(wp_index))
+    # print("I am in checked waypoint {0} reached function".format(wp_index))
     
     aLocation = LocationGlobalRelative(lat, lon, float(alt))
     
@@ -121,7 +122,7 @@ def main():
 
  
     # Specify control loop rate. We recommend a low frequency to not over load the FCU with messages. Too many messages will cause the drone to be sluggish.
-    rate = rospy.Rate(0.1)
+    # rate = rospy.Rate(0.1)
     global vehicle
 
     # Connect to the Vehicle
@@ -180,36 +181,95 @@ def main():
 
    
     # # Specify GPS waypoints
-    goals = [[ 24.7944000, 67.1352048,5,1], 
-             [ 24.79439760,67.13521150,5,2], 
-             [ 24.794442070,67.13542070,5,3],
-             [24.79477870,67.13535640,5,4], 
-             [24.79475190,67.13510290,5,5], 
-             [ 24.79439520,67.13516730,5,6], 
-             [ 24.7944000, 67.1352048,5,7], 
-             [ 24.79439760,67.13521150,5,8],
-             [24.794442070,67.13542070,5,9], 
-             [24.79477870,67.13535640,5,10], 
-             [ 24.79475190,67.13510290,5,11],
-             [24.79439520,67.13516730,5,12],
+    # goals = [[ 24.7944000, 67.1352048,5,1], 
+    #          [ 24.79439760,67.13521150,5,2], 
+    #          [ 24.794442070,67.13542070,5,3],
+    #          [24.79477870,67.13535640,5,4], 
+    #          [24.79475190,67.13510290,5,5], 
+    #          [ 24.79439520,67.13516730,5,6], 
+    #          [ 24.7944000, 67.1352048,5,7], 
+    #          [ 24.79439760,67.13521150,5,8],
+    #          [24.794442070,67.13542070,5,9], 
+    #          [24.79477870,67.13535640,5,10], 
+    #          [ 24.79475190,67.13510290,5,11],
+    #          [24.79439520,67.13516730,5,12],
              
-             ]
+    #          ]
 
-    i = 0
-
+    waypoints_lap_01=[[ 24.7944000, 67.1352048,5,1], 
+            
+             [ 24.794442070,67.13542070,5,2],
+             [24.79477870,67.13535640,5,3], 
+             [24.79475190,67.13510290,5,4], 
+             [ 24.79439520,67.13516730,5,5] ]
     
-    while i < len(goals):
+    waypoints_lap_02=[[ 24.7944000, 67.1352048,5,1], 
+             
+             [ 24.794442070,67.13542070,5,2],
+             [24.79477870,67.13535640,5,3], 
+             [24.79475190,67.13510290,5,4], 
+             [ 24.79439520,67.13516730,5,5] ]
+    i = 0
+    ENTRY_FLAG_01=1
+    ENTRY_FLAG_02=1
+    
+    TOTAL_WAYPOINTS_LAP_01=len(waypoints_lap_01)
+    while i< TOTAL_WAYPOINTS_LAP_01:
+        lap_counter = rospy.get_param('/Lap_Count')
+        rospy.set_param('/Current_Waypoint_Index_Lap_01',i)
+        
+        Water_Discharge_Location_Saved_Lap_01=rospy.get_param('Water_Discharge_Location_Saved')
+        Water_Reservoir_Location_Saved_Lap_01=rospy.get_param('Water_Reservoir_Location_Saved')
+
+        x=waypoints_lap_01[i][0]
+        y=waypoints_lap_01[i][1]
+        z=waypoints_lap_01[i][2] 
+        way_point_index=waypoints_lap_01[i][3]
+        set_destination(x,y,z,way_point_index)
+        time.sleep(5)    
+        if check_waypoint_reached(x, y, z, way_point_index):
+            i += 1
+
+       
+
+        print('Water_Reservoir_Location_Saved_Lap_01:',Water_Reservoir_Location_Saved_Lap_01)
+        if Water_Reservoir_Location_Saved_Lap_01 and lap_counter==1:
+            if ENTRY_FLAG_01==1:
+                Latitude=rospy.get_param('/Water_Reservoir_Location_Latitude')
+                Longitude=rospy.get_param('/Water_Reservoir_Location_Longitude')
+                Altitude=5 #rospy.get_param('/Water_Reservoir_Location_Altitude')
+                index=rospy.get_param('/Waypoint_Index_After_which_BLUE_was_detected')
+                waypoints_lap_02.insert(index,[Latitude,Longitude,Altitude,index])
+                print('I am inserting the BLUE''s GPS location in the waypoints_lap_02 at index:',index)
+                ENTRY_FLAG_01=0
+       
+        print('Water_Discharge_Location_Saved_Lap_01:',Water_Discharge_Location_Saved_Lap_01)
+ 
+        if Water_Discharge_Location_Saved_Lap_01 and lap_counter==1:
+            if ENTRY_FLAG_02==1:
+                Latitude=rospy.get_param('/Water_Discharge_Location_Latitude')
+                Longitude=rospy.get_param('/Water_Discharge_Location_Longitude')
+                Altitude=5 #rospy.get_param('/Water_Discharge_Location_Altitude')
+                index=rospy.get_param('/Waypoint_Index_After_which_RED_was_detected')
+                waypoints_lap_02.insert(index+1,[Latitude,Longitude,Altitude,index+1]) #If we use index the RED location will be inserted before waypoint 3 which will be incorrect
+                print('I am inserting the RED''s GPS location in the waypoints_lap_02 at index',index)
+                ENTRY_FLAG_02=0
+
+    print(waypoints_lap_02)
+    i=0
+    rospy.set_param('/Lap_Count', 2)
+    TOTAL_WAYPOINTS_LAP_02=len(waypoints_lap_02)
+    
+    while i < TOTAL_WAYPOINTS_LAP_02:
 
         lap_counter = rospy.get_param('/Lap_Count')
-     #     #print('Lap Count=',lap_counter)
-        Water_Reservoir_Location_Detected_local_variable=rospy.get_param('/Water_Reservoir_Location_Detected')
-        Water_Discharge_Location_Detected_local_variable=rospy.get_param('/Water_Discharge_Location_Detected')
+        #print('Lap Count=',lap_counter)
         #rospy.loginfo('Water Reservoir',Water_Reservoir_Location_Detected_local_variable)
+
+        Water_Reservoir_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Reservoir_Location_Detected_Lap_02')
+        Water_Discharge_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Discharge_Location_Detected_Lap_02')
         
-        if i>len(goals)/2:
-            rospy.set_param('/Lap_Count', 2)
-        
-        condition=(not Water_Reservoir_Location_Detected_local_variable) and  (not Water_Discharge_Location_Detected_local_variable) 
+        condition=(not Water_Reservoir_Location_Detected_local_variable_Lap_02) and  (not Water_Discharge_Location_Detected_local_variable_Lap_02) 
      #     #condition= 1 and 1
      #     #print('If condition result',condition)
         rate1 = rospy.Rate(0.1) # ROS Rate at 5Hz
@@ -218,12 +278,12 @@ def main():
         # elif not(condition):
         #     print('I am executing waypoint number :{0}'.format(i))
         if condition:
-            x=goals[i][0]
-            y=goals[i][1]
-            z=goals[i][2] 
-            way_point_index=goals[i][3]
+            x=waypoints_lap_02[i][0]
+            y=waypoints_lap_02[i][1]
+            z=waypoints_lap_02[i][2] 
+            way_point_index=waypoints_lap_02[i][3]
             set_destination(x,y,z,way_point_index)
-                
+            time.sleep(2)    
             # rate.sleep()
             # while TRUE:
             if check_waypoint_reached(x, y, z, way_point_index):

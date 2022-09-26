@@ -29,7 +29,7 @@ def set_destination(lat, lon, alt, wp_index):
     vehicle.simple_goto(aLocation)
     dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
-    while dist_to_wp > 10:
+    while dist_to_wp > 1:
         print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
@@ -154,16 +154,23 @@ if __name__ == '__main__':
     # 5) 24.79475190	67.13510290	10.000000
     # 6) 24.79439520	67.13516730	10.000000
 
-    set_destination(24.79439760,67.13521150,5,2)
-    time.sleep(10)
-    set_destination(24.794442070,67.13542070,5,3)
-    time.sleep(10)
-    set_destination(24.79477870,67.13535640,5,4)
-    time.sleep(10)
-    set_destination(24.79475190,67.13510290,5,5)
-    time.sleep(10)
-    set_destination(24.79439520,67.13516730,5,6)
-    time.sleep(1)
+    # waypoints_lap_01=[[ 24.7944000, 67.1352048,5,1], 
+            
+    #          [ 24.794442070,67.13542070,5,2],
+    #          [24.79477870,67.13535640,5,3], 
+    #          [24.79475190,67.13510290,5,4], 
+    #          [ 24.79439520,67.13516730,5,5] ]
+    SLEEP_TIME=10
+    set_destination(24.7944000, 67.1352048,5,1)
+    time.sleep(SLEEP_TIME)
+    set_destination(24.794442070,67.13542070,5,2)
+    time.sleep(SLEEP_TIME)
+    set_destination(24.79477870,67.13535640,5,3)
+    time.sleep(SLEEP_TIME)
+    set_destination(24.79475190,67.13510290,5,4)
+    time.sleep(SLEEP_TIME)
+    set_destination(24.79439520,67.13516730,5,5)
+    time.sleep(SLEEP_TIME)
 
     print('Completed all Waypoints! Returning to launch')
     vehicle.mode = VehicleMode("RTL")

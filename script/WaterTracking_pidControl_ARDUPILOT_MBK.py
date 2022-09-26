@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 #!/usr/bin/env python2
 
+from pickle import TRUE
 import sys
 import time
 import numpy as np
@@ -26,7 +27,8 @@ from pid_controller_mbk import pid_controller
 # Kd (Derivative Gain)
 # limit (controller saturation limit)
 
-THRESHOLD_FOR_DISTANCE_TO_CENTER=80
+THRESHOLD_FOR_DISTANCE_TO_CENTER=100
+HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK= 3.5
 
 controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
 controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
@@ -50,7 +52,34 @@ def pos_sub_callback(pose_sub_data):
     current_pose = pose_sub_data
 
 
+def GPS_Position_Callback_function(data_recieve):
+    latitude=data_recieve.latitude
+    longitude=data_recieve.longitude
+    altitude=data_recieve.altitude
 
+    #Reading parameters from the ROS Parameter Server       
+    lap_counter = rospy.get_param("/Lap_Count")
+    Water_Discharge_Location_Detected_Lap_01 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_01")
+    Water_Reservoir_Location_Detected_Lap_01 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_01")
+
+       #Saving the GPS location of the Water_Discharge_Location to ROS parameter server 
+    if (lap_counter ==1 and Water_Discharge_Location_Detected_Lap_01):
+     
+        rospy.set_param('/Water_Discharge_Location_Latitude',latitude)
+        rospy.set_param('/Water_Discharge_Location_Longitude', longitude)
+        rospy.set_param('/Water_Discharge_Location_Altitude' ,altitude)
+        rospy.set_param('/Water_Discharge_Location_Saved',1)
+        rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
+
+
+      #Saving the GPS location of the Water_Reservoir_Location to ROS parameter server 
+    if (lap_counter ==1 and Water_Reservoir_Location_Detected_Lap_01):
+        rospy.set_param('/Water_Reservoir_Location_Latitude', latitude)
+        rospy.set_param('/Water_Reservoir_Location_Longitude' ,longitude)
+        rospy.set_param('/Water_Reservoir_Location_Altitude ',altitude)
+        rospy.set_param('/Water_Reservoir_Location_Saved',1)
+        rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
+        
 def Water_Discharge_Detected_Callback_function(data_recieve):
     #RED
     
@@ -69,7 +98,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
     X_Error= setPointX-currentX       #Remember these errors are caluclated in the image frame of reference where
     Y_Error= setPointY-currentY       #(x,y) is the top left corner
    
-    Z_Error=Z_position-2 #Setpoint in z-direction for Quadcopter is 2m
+    Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter above the tank
 
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
@@ -77,10 +106,11 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
      
     #Reading parameters from the ROS Parameter Server       
     lap_counter = rospy.get_param("/Lap_Count")
-    Water_Discharge_Location_Detected = rospy.get_param("/Water_Discharge_Location_Detected")
-    
-    
-    if (lap_counter >1 and Water_Discharge_Location_Detected):
+    Water_Discharge_Location_Detected_Lap_02 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_02")
+    EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
+
+  
+    if (lap_counter >1 and Water_Discharge_Location_Detected_Lap_02 and not(EXECUTING_WAYPOINT_NAVIGATION)):
         #for Water tracking (Old Strategy)
         #Our strategy is, 1) locate the water 
         #2) change Yaw so that Quadcopter points in the direction of water
@@ -94,7 +124,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
         #  -----------------------------------------------------------------
         # Very important transformation between quadcopter and image frame
         #  ----------------------------------------------------------------
-    
+  
 
         #Relationship of image reference frame and quadcopter reference frame
         #(x,y) of the image reference frame is at the top left
@@ -135,7 +165,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
         #  -------------------------------------
         # All controllers at the same time
         #  -------------------------------------
-        Water_Released_by_Syringes_local_variable=rospy.get_param('/Water_Released_by_Syringes')
+        Water_Released_by_Syringes_local_variable=rospy.get_param('Water_Released_by_Syringes')
+
 
         if distance_to_center > THRESHOLD_FOR_DISTANCE_TO_CENTER:
             twist.twist.linear.x=0.1*controller_x.set_current_error(X_Error)
@@ -154,10 +185,10 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
         elif distance_to_center <THRESHOLD_FOR_DISTANCE_TO_CENTER:
 
-            twist.twist.linear.x=0.1*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
+            twist.twist.linear.x=0.1*controller_x.set_current_error(X_Error)
+            twist.twist.linear.y=0.1*controller_y.set_current_error(-Y_Error)
             if Z_Error>1 and not(Water_Released_by_Syringes_local_variable):
-                twist.twist.linear.z=-10*controller_z.set_current_error(Z_Error)
+                twist.twist.linear.z=-5*controller_z.set_current_error(Z_Error)
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Released_by_Syringes_local_variable):
                 time.sleep(5)
@@ -173,14 +204,14 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
                 
             #I have to move back the quadcopter to the previous height
             if (5-Z_position)>1 and Water_Released_by_Syringes_local_variable:
-                twist.twist.linear.z=10*controller_z.set_current_error(5-Z_position)
-                # print('I am rising my Z_position is :',Z_position)
+                twist.twist.linear.z=5*controller_z.set_current_error(5-Z_position)
+                print('I am rising my Z_position is :',Z_position)
 
             #Adding a new condition here , the quadcopter was stuck after releasing the water
             # since   /Water_Discharge_Location_Detected was set to '0' hence it was not entering
             #in this if condition again
             elif (5-Z_position)<1 and Water_Released_by_Syringes_local_variable:
-                rospy.set_param("/Water_Discharge_Location_Detected",0)
+                rospy.set_param("/Water_Discharge_Location_Detected_Lap_02",0)
                 print('I am continuing my mission on the waypoints')   
 
             # print('Cond 2,Z position = {0} Z error ={1}  Euclidean distance = {2}'.format(Z_position,Z_Error, distance_to_center))
@@ -213,7 +244,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
     X_Error= setPointX-currentX       #Remember these errors are caluclated in the image frame of reference where
     Y_Error= setPointY-currentY       #(x,y) is the top left corner
    
-    Z_Error=Z_position-2 #Setpoint in z-direction for Quadcopter is 5m
+    Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter 
 
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
@@ -221,10 +252,13 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
      
     #Reading parameters from the ROS Parameter Server       
     lap_counter = rospy.get_param("/Lap_Count")
-    Water_Reservoir_Location_Detected = rospy.get_param("/Water_Reservoir_Location_Detected")
+    Water_Reservoir_Location_Detected_Lap_02 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_02")
 
+    EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
     
-    if (lap_counter >1 and Water_Reservoir_Location_Detected):
+
+  
+    if (lap_counter >1 and Water_Reservoir_Location_Detected_Lap_02 and not(EXECUTING_WAYPOINT_NAVIGATION)):
         #for Water tracking (Old Strategy)
         #Our strategy is, 1) locate the water 
         #2) change Yaw so that Quadcopter points in the direction of water
@@ -265,7 +299,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
         # All controllers at the same time
         #  -------------------------------------
         Water_Sucked_by_Syringes_local_variable=rospy.get_param('Water_Sucked_by_Syringes')
-
+        # print('distance to center',distance_to_center)
         if distance_to_center > THRESHOLD_FOR_DISTANCE_TO_CENTER:
             twist.twist.linear.x=0.1*controller_x.set_current_error(-X_Error)
             twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
@@ -284,7 +318,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             # print('BLUE:Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
 
             if Z_Error>1 and not(Water_Sucked_by_Syringes_local_variable):
-                twist.twist.linear.z=-10*controller_z.set_current_error(Z_Error)
+                twist.twist.linear.z=-5*controller_z.set_current_error(Z_Error)
                 # print('My Z_Error is greater than 0.1 and my z-position is=',Z_position)
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Sucked_by_Syringes_local_variable):
@@ -296,15 +330,15 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
 
                 #I have to move back the quadcopter to the previous height
             if (5-Z_position)>1 and Water_Sucked_by_Syringes_local_variable:
-                twist.twist.linear.z=10*controller_z.set_current_error(5-Z_position)
-                # print('I am rising, my Z_position is :',Z_position)
+                twist.twist.linear.z=5*controller_z.set_current_error(5-Z_position)
+                print('I am rising, my Z_position is :',Z_position)
             
 
             #Adding a new condition here , the quadcopter was stuck after sucking the water
             # since   /Water_Reservoir_Location_Detected was set to '0' hence it was not enter
             #in this if condition again
             elif (5-Z_position)<1 and Water_Sucked_by_Syringes_local_variable:
-                rospy.set_param("/Water_Reservoir_Location_Detected",0)
+                rospy.set_param("/Water_Reservoir_Location_Detected_Lap_02",0)
                 print('I am continuing my mission on the waypoints')
                 
                          
@@ -347,9 +381,12 @@ if __name__ == '__main__':
 
     reciever=rospy.Subscriber("/Water_Discharge_Location_Topic",Float32MultiArray,Water_Discharge_Detected_Callback_function,queue_size=10)
 
+    reciever=rospy.Subscriber("/mavros/global_position/global",NavSatFix,GPS_Position_Callback_function,queue_size=10)
+
 
     local_position_subscribe = rospy.Subscriber(dronetype+'/local_position/pose', PoseStamped, pos_sub_callback)    
     
+
     #We will takeoff and land using Anis Kouba's Code for generating comand to MavProxy (dronemap_control_using_MAVROS)
     #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)
     #pub_land = rospy.Publisher(dronetype+"/land", Empty, queue_size=10)

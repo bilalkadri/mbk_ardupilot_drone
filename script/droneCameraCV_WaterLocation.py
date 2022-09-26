@@ -33,12 +33,12 @@ twist=Twist()
 pts_red = deque(maxlen=64)
 pts_blue = deque(maxlen=64)
 
-# x_blue=0
-# y_blue=0
-# radius_blue=0
-# x_red=0
-# y_red=0
-# radius_red=0
+x_blue=0
+y_blue=0
+radius_blue=0
+x_red=0
+y_red=0
+radius_red=0
 # Water_Reservoir_Location =0
 # Water_Discharge_Location =0
 
@@ -164,13 +164,20 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         # print('Centroid of the Contour=({0},{1})'.format(center_red[0],center_red[1]))
         
 		# only proceed if the radius meets a minimum size
+        # print('Radius RED is:', radius_red)
         if radius_red > 10:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
         
+                if lap_counter==1:
+                    rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',1)
+                    index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
+                    rospy.set_param('/Waypoint_Index_After_which_RED_was_detected',index)
+
+
                 if (not(Water_Released_by_Syringes_local_variable) and (lap_counter>1)):
-                    rospy.set_param('/Water_Discharge_Location_Detected',1)
+                    rospy.set_param('/Water_Discharge_Location_Detected_Lap_02',1)
 
                 # draw the circle and centroid on the frame,
                 # then update the list of tracked points
@@ -217,8 +224,13 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
 
+                if lap_counter==1:
+                    rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',1)
+                    index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
+                    rospy.set_param('/Waypoint_Index_After_which_BLUE_was_detected',index)
+
                 if (not(Water_Sucked_by_Syringes_local_variable) and (lap_counter>1)):
-                    rospy.set_param('/Water_Reservoir_Location_Detected',1)
+                    rospy.set_param('/Water_Reservoir_Location_Detected_Lap_02',1)
 
                 
                 # draw the circle and centroid on the frame,
