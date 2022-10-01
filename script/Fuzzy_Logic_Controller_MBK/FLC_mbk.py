@@ -87,7 +87,7 @@ class fuzzy_logic_controller:
             self._output_Ki = 0
             output=0
 
-	if output > self._limit_out:
+        if output > self._limit_out:
             output = self._limit_out
         elif output < (-self._limit_out):
             output = (-self._limit_out)
