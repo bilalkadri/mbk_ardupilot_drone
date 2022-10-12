@@ -31,7 +31,7 @@
 			<uri>model://water_release_target</uri>
 			<!--<pose>35 6 0 1.571 0 1.571</pose>-->
 			<!--<pose>42.196 -2.4035 0 1.571 0 1.571</pose>-->
-			<pose>40.245 -2.876 0 1.571 0 1.571</pose>
+			<pose>37.328 -3.5768 0 1.571 0 1.571</pose>
 		</include>
 
 		<!-- Teknofest Poles -->

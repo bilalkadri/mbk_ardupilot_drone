@@ -33,5 +33,9 @@
     name="MBK_Set_Flight_Modes_and_Tracking_PID_Controller" output="screen" >
 </node>
 
-
+<!--MFFAC Controller for Picking and Dropping Water-->
+<!-- <node pkg="mbk_ardupilot_drone" type="WaterTracking_fuzzyControl_ARDUPILOT_MBK.py" 
+  
+    name="MBK_Set_Flight_Modes_and_Tracking_MFFAC_Controller" output="screen" >
+</node> -->
 </launch>

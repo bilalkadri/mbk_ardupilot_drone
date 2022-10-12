@@ -45,7 +45,7 @@ def test_FLC(P = 0.2,  I = 0.0, D= 0.0, L=100):
     # pid.SetPoint=0.0
     # pid.setSampleTime(0.01)
 
-    pid=fuzzy_logic_controller(P,I,D,20,5)     
+    MFFAC=fuzzy_logic_controller(P,I,D,20,5)     
     
     #Testing Fuzzification function
     #value=pid.Fuzzification(10.125)
@@ -57,7 +57,7 @@ def test_FLC(P = 0.2,  I = 0.0, D= 0.0, L=100):
     #print('The new weights are:',pid._weights)
     
     
-    Control_Signal=pid.Executing_FLC([0.1,0.2])
+    Control_Signal=MFFAC.Executing_FLC([0.1,0.2])
     print('Control Signal={0}'.format(Control_Signal))
     
     

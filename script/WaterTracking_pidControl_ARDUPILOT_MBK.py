@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 #!/usr/bin/env python2
 
+from array import array
 from pickle import TRUE
 import sys
 import time
@@ -19,6 +20,7 @@ from mavros_msgs.msg import State
 import math
 import threading
 from pid_controller_mbk import pid_controller
+import matplotlib.pyplot as plt
 
 #-------------------------------------------------------
 #EXPLANATION OF THE pid_controller (Kp,Ki,Kd,limit) parameters
@@ -40,12 +42,20 @@ controller_y = pid_controller(0.01, .01, 2, 1) # global y, for copter looking at
 dronetype='/mavros'
 
 
+# global variables
 empty_msg = Empty()
 twist=TwistStamped()
 theta=0
 water_detected=0 #flag for water detection
 current_pose = PoseStamped()
-
+# currentX_BLUE_Vector=[] 
+# currentY_BLUE_Vector=[] 
+# setPointX_BLUE_Vector=[]
+# setPointY_BLUE_Vector=[]
+# X_Error_BLUE_Vector=[]
+# Y_Error_BLUE_Vector=[]
+# counter_for_BLUE=0
+# index_BLUE_Vector=[]
 
 def pos_sub_callback(pose_sub_data):
     global current_pose
@@ -185,8 +195,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
         elif distance_to_center <THRESHOLD_FOR_DISTANCE_TO_CENTER:
 
-            twist.twist.linear.x=0.1*controller_x.set_current_error(X_Error)
-            twist.twist.linear.y=0.1*controller_y.set_current_error(-Y_Error)
+            twist.twist.linear.x=0.1*controller_x.set_current_error(-X_Error)
+            twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
             if Z_Error>1 and not(Water_Released_by_Syringes_local_variable):
                 twist.twist.linear.z=-5*controller_z.set_current_error(Z_Error)
             
@@ -228,7 +238,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
 def Water_Reservoir_Detected_Callback_function(data_recieve):
     
-    
+    global counter_for_BLUE
     #print('Water Reservoir detected')
     #print data_recieve.data[0]
     setPointX=data_recieve.data[0]  # 320, 640/2 , half the size of x-dimension of window 
@@ -246,6 +256,15 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
    
     Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter 
 
+    # BLUE_Data=[setPointX,currentX,X_Error,setPointY,currentY,Y_Error,Z_Error]
+
+
+
+    # dataTosend_blue=Float32MultiArray(data=BLUE_Data)
+    # pub_BLUE_Data.publish(dataTosend_blue)
+
+
+
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
     # print('depth Error',depth_Error) 
@@ -259,11 +278,32 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
 
   
     if (lap_counter >1 and Water_Reservoir_Location_Detected_Lap_02 and not(EXECUTING_WAYPOINT_NAVIGATION)):
+
+
+        #For plotting currentX, currentY, setPointX, setPointY, X_Error, Y_Error
+        # we need to save these values in a list , at the end of the execution we should 
+        # save the list in a file
+        # counter_for_BLUE=counter_for_BLUE+1
+        # currentX_BLUE_Vector.append(currentX)
+        # currentY_BLUE_Vector.append(currentY)
+        # setPointX_BLUE_Vector.append(setPointX)
+        # setPointY_BLUE_Vector.append(setPointY)
+        # X_Error_BLUE_Vector.append(X_Error)
+        # Y_Error_BLUE_Vector.append(Y_Error)
+       
+        # index_BLUE_Vector.append(counter_for_BLUE)
+        
+      
+ 
+
         #for Water tracking (Old Strategy)
         #Our strategy is, 1) locate the water 
         #2) change Yaw so that Quadcopter points in the direction of water
         #3) when error in Yaw is less that 10 degrees i.e. pi/18 then start moving towards the water
         #4)when Yaw is less than 10 degrees and Euclidean distance i.e. 'r' is also less than 0.01 then move in z-directon
+
+
+
 
         distance_to_center=math.sqrt(X_Error**2+Y_Error**2)  #X_Error and Y_Error are computed in image reference frame
         yaw_error=math.atan2(Y_Error,X_Error)
@@ -350,7 +390,15 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             twist.twist.angular.y=0
             twist.twist.angular.z=0 #controller_yaw.set_current_error(0)
         
+        # plt.rcParams["figure.figsize"] = [7.50, 3.50]
+        # plt.rcParams["figure.autolayout"] = True
+
         
+        # plt.title("Line graph")
+        # plt.plot(index_BLUE_Vector, currentX_BLUE_Vector, color="red")
+
+        # plt.show()
+
         pub_move.publish(twist)
 
 
@@ -393,7 +441,9 @@ if __name__ == '__main__':
 
 
     pub_move = rospy.Publisher(dronetype+'/setpoint_velocity/cmd_vel', TwistStamped, queue_size=10)     
-      
+  
+    #WE would like to save the data that will be used in controllers  
+    pub_BLUE_Data=rospy.Publisher('/Water_Reservoir_Data_for_Controller', Float32MultiArray, queue_size=10)
     
     
     rospy.spin()
