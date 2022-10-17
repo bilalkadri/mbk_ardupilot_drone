@@ -160,7 +160,7 @@ if __name__ == '__main__':
     #          [24.79477870,67.13535640,5,3], 
     #          [24.79475190,67.13510290,5,4], 
     #          [ 24.79439520,67.13516730,5,5] ]
-    SLEEP_TIME=10
+    SLEEP_TIME=1
     set_destination(24.7944000, 67.1352048,5,1)
     time.sleep(SLEEP_TIME)
     set_destination(24.794442070,67.13542070,5,2)
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     time.sleep(SLEEP_TIME)
 
     print('Completed all Waypoints! Returning to launch')
-    vehicle.mode = VehicleMode("RTL")
+    vehicle.mode = VehicleMode("LAND")
 
 
     #Close vehicle object before exiting script

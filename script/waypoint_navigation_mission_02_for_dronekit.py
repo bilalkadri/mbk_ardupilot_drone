@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
-from inspect import FullArgSpec
+# from inspect import FullArgSpec
 from pickle import FALSE, TRUE
 # Import ROS.
 import rospy
@@ -198,17 +198,29 @@ def main():
 
     waypoints_lap_01=[[ 24.7944000, 67.1352048,5,1], 
             
-             [ 24.794442070,67.13542070,5,2],
-             [24.79477870,67.13535640,5,3], 
-             [24.79475190,67.13510290,5,4], 
-             [ 24.79439520,67.13516730,5,5] ]
+             [ 24.7944000, 67.1352048,5,2],
+             [24.7944000, 67.1352048,5,3], 
+             [ 24.7944000, 67.1352048,5,4], 
+             [ 24.7944000, 67.1352048,5,5] ]
     
-    waypoints_lap_02=[[ 24.7944000, 67.1352048,5,1], 
+    # waypoints_lap_01=[[ 24.7944000, 67.1352048,5,1], 
+            
+    #          [ 24.794442070,67.13542070,5,2],
+    #          [24.79477870,67.13535640,5,3], 
+    #          [24.79475190,67.13510290,5,4], 
+    #          [ 24.79439520,67.13516730,5,5] ]
+
+    # waypoints_lap_02=[[ 24.7944000, 67.1352048,5,1], 
              
-             [ 24.794442070,67.13542070,5,2],
-             [24.79477870,67.13535640,5,3], 
-             [24.79475190,67.13510290,5,4], 
-             [ 24.79439520,67.13516730,5,5] ]
+    #          [ 24.794442070,67.13542070,5,2],
+    #          [24.79477870,67.13535640,5,3], 
+    #          [24.79475190,67.13510290,5,4], 
+    #          [ 24.79439520,67.13516730,5,5] ]
+
+    waypoints_lap_02=[]
+
+    # MBK is cvhanging this only for testing, we need to determine the area and radius of the
+    # BLUE and RED contour
     i = 0
     ENTRY_FLAG_01=1
     ENTRY_FLAG_02=1
@@ -294,7 +306,7 @@ def main():
                 # rate1.sleep()
 
     print('Completed all Waypoints! Returning to launch')
-    vehicle.mode = VehicleMode("RTL")
+    vehicle.mode = VehicleMode("LAND")
 
 
     #Close vehicle object before exiting script
