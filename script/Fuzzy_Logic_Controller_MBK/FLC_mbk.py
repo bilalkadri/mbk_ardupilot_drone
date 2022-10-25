@@ -2,7 +2,7 @@ import time
 
 
 class fuzzy_logic_controller:
-
+# Model Free Fuzzy Adptive Controller
 #This was originally a PD controller, MBK added the Integral term, hence converitng it into a PID
 #MBK has to test this code
 
