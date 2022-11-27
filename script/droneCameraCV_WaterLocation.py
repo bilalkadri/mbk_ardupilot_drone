@@ -197,8 +197,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         # print('Centroid of the Contour=({0},{1})'.format(center_red[0],center_red[1]))
         
 		# only proceed if the radius meets a minimum size
-        # print('Radius RED is:', radius_red)
-        if radius_red > 10:
+        # print('Radius ED is:', radius_red)
+        if radius_red > 50:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
@@ -252,7 +252,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         center_blue = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         # print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
 		# only proceed if the radius meets a minimum size
-        if radius_blue > 10:
+        if radius_blue > 50:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')

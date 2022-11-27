@@ -3,10 +3,23 @@ import numpy as np
 import imutils
 from collections import deque
 from std_msgs.msg import Float32MultiArray
+import time
+import numpy as np
+import rospy
+from sensor_msgs.msg import Image
+
+dronetype='/mavros'
+#  pub_image
+# pub_image = rospy.Publisher(dronetype+'/image_raw', Image, queue_size=10)     
+   
+
+
+# global pub_image  #publisher for images
+
 
 def gstreamer_pipeline(
-    capture_width=1920,
-    capture_height=1080,
+    capture_width=1280,
+    capture_height=720,
     display_width=960,
     display_height=540,
     framerate=30,
@@ -45,6 +58,7 @@ x_blue=0
 y_blue=0
 radius_red=0
 radius_blue=0
+# pub_image=0
 
 pts_red = deque(maxlen=64)
 pts_blue = deque(maxlen=64)
@@ -57,19 +71,21 @@ cap = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
 if not cap.isOpened():
     raise IOError("Cannot open webcam")
 
+
 while True:
     ret, frame = cap.read()
-    frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-    cv2.imshow('Input', frame)
     
+    frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
 
+    cv2.imshow('Input', frame)
+    # pub_image.publish(frame) 
     cv_image_red = frame
     cv_image_blue = frame
 
     height_red,width_red,channel = cv_image_red.shape
     height_blue,width_blue,channel = cv_image_blue.shape   
 
-   # hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     frame_red=     cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2HSV)
     cv_image_red = cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2HSV)
@@ -397,7 +413,40 @@ while True:
     if c == 27:
         break
 
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
 
 
+def image_publisher():
+    # global pub_image
+    #global water_detected
+    # global pub_image
+    pub_image = rospy.Publisher(dronetype+'/image_raw', Image, queue_size=10)     
+        
+    rospy.init_node('Water_Reservoir_with_ROS',anonymous=True)
+    print('I am in main function')    
+   
+    # reciever=rospy.Subscriber("/Water_Discharge_Location_Topic",Float32MultiArray,Water_Discharge_Detected_Callback_function,queue_size=10)
+
+    # reciever=rospy.Subscriber("/mavros/global_position/global",NavSatFix,GPS_Position_Callback_function,queue_size=10)
+    rate=rospy.Rate(10)
+
+    # local_position_subscribe = rospy.Subscriber(dronetype+'/local_position/pose', PoseStamped, pos_sub_callback)    
+    while not rospy.is_shutdown():
+       # pub_image.publish(frame)
+        rate.sleep()
+
+    #We will takeoff and land using Anis Kouba's Code for generating comand to MavProxy (dronemap_control_using_MAVROS)
+    #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)
+    #pub_land = rospy.Publisher(dronetype+"/land", Empty, queue_size=10)
+
+
+
+
+if __name__ == '__main__':
+    try:
+        image_publisher()
+    except rospy.ROSInterruptException:
+        pass
+
+   
