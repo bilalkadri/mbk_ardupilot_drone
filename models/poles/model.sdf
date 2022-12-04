@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="poles">
+    <static>true</static>
+    <link name="pole">
+      <collision name="pole_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.1</radius>
+            <length>5</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="pole_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.1</radius>
+            <length>5</length>
+          </cylinder>
+        </geometry>
+        <material> 
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/WoodFloor</name>
+          </script>
+        </material>
+      </visual>  
+    </link>
+  </model>
+</sdf>
