@@ -424,7 +424,7 @@ def image_publisher():
     pub_image = rospy.Publisher(dronetype+'/image_raw', Image, queue_size=10)     
         
     rospy.init_node('Water_Reservoir_with_ROS',anonymous=True)
-    print('I am in main function')    
+    print('I am in image_publisher function')    
    
     # reciever=rospy.Subscriber("/Water_Discharge_Location_Topic",Float32MultiArray,Water_Discharge_Detected_Callback_function,queue_size=10)
 

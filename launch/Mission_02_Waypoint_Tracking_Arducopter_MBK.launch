@@ -18,6 +18,12 @@
     name="Generating_Trajectory" output="screen" >
 </node> -->
 
+<!-- Acquiring video from the camera and publishing it on /mavros/image_raw topic -->
+
+<node pkg="mbk_ardupilot_drone" type="acquire_camera_video.py" 
+  
+    name="Camera_Image_Publisher" output="screen" >
+</node>
 
 <!-- Determining (x,y) coordinates of the Water Reservoir and Water Discharge Location -->
 
