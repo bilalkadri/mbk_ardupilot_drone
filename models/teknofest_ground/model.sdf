@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+
+  <model name="teknofest_ground">
+    
+    <static>true</static>
+
+    <link name="flyzone">
+      <collision name="flyzone_collision">
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>170 120</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="flyzone_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>170 120</size>
+          </plane>
+          <!-- <box>
+            <size>170 120 0.02</size>
+          </box> -->
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grass</name>
+          </script>
+        </material>
+      </visual>  
+    </link>
+
+    <link name="bufferzone">
+      <collision name="bufferzone_collision">
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>180 130</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="bufferzone_visual">
+        <pose>0 0 -0.1 0 0 0</pose>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>180 130</size>
+          </plane>
+          <!-- <box>
+            <size>180 130 0.015</size>
+          </box> -->
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+        </material>
+      </visual>  
+    </link>
+    
+    <link name="noflyzone">
+      <collision name="noflyzone_collision">
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>200 150</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="noflyzone_visual">
+        <pose>0 0 -0.2 0 0 0</pose>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>200 150</size>
+          </plane>
+          <!-- <box>
+            <size>200 150 0.01</size>
+          </box> -->
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
+          </script>
+        </material>
+      </visual>  
+    </link>
+  
+   <link name="takeoffzone">
+      <collision name="takeoffzone_collision">
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>70 10</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="takeoffzone_visual">
+        <pose>0 -50 0.1 0 0 0</pose>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>70 10</size>
+          </plane>
+          <!-- <box>
+            <size>70 10 0.025</size>
+          </box> -->
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>  
+    </link>
+
+  </model>
+</sdf>
