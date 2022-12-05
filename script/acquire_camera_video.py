@@ -1,3 +1,4 @@
+#! /usr/bin/python
 # MIT License
 # Copyright (c) 2019-2022 JetsonHacks
 # See LICENSE for OpenCV license and additional information
@@ -60,7 +61,7 @@ def water_location_detect():
     video_capture = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
     if video_capture.isOpened():
         try:
-            cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
+            # cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
             while not rospy.is_shutdown():
                 ret, frame = video_capture.read()
 
@@ -75,10 +76,10 @@ def water_location_detect():
                 pub.publish(ros_image)
                 rate.sleep()
 
-                if cv2.getWindowProperty(window_title, cv2.WND_PROP_AUTOSIZE) >= 0:
-                    cv2.imshow(window_title, frame)
-                else:
-                    break
+                # if cv2.getWindowProperty(window_title, cv2.WND_PROP_AUTOSIZE) >= 0:
+                #     cv2.imshow(window_title, frame)
+                # else:
+                #     break
                 keyCode = cv2.waitKey(10) & 0xFF
                 # Stop the program on the ESC key or 'q'
                 if keyCode == 27 or keyCode == ord('q'):

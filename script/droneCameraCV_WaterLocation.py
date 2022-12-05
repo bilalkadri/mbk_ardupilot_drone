@@ -71,13 +71,14 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 
     #The image coming from ROS which has been converted into OpenCV by using 'bridge.imgmsg_to_cv2' will be 
     #in BGR format, we need to convert it into RGB format therefore we will use cv2.cvtcolor function
-
-    frame_red=     cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2RGB)
-    cv_image_red = cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2RGB)
+    frame_red=cv_image_red
+    # frame_red=     cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2RGB)
+    # cv_image_red = cv2.cvtColor(cv_image_red,cv2.COLOR_BGR2RGB)
     blurred_red =  cv2.GaussianBlur(frame_red, (13, 13), 0)  
 
-    frame_blue=     cv2.cvtColor(cv_image_blue,cv2.COLOR_BGR2RGB)
-    cv_image_blue = cv2.cvtColor(cv_image_blue,cv2.COLOR_BGR2RGB)
+    frame_blue=cv_image_blue
+    # frame_blue=     cv2.cvtColor(cv_image_blue,cv2.COLOR_BGR2RGB)
+    # cv_image_blue = cv2.cvtColor(cv_image_blue,cv2.COLOR_BGR2RGB)
     blurred_blue =  cv2.GaussianBlur(frame_blue, (13, 13), 0)  
 
    
