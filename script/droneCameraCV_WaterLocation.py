@@ -25,6 +25,8 @@ from collections import deque
 #upper_blue = np.array([130,255,255])
 
 dronetype='/webcam'
+RADIUS_RED_THRESHOLD=50
+RADIUS_BLUE_THRESHOLD=50
 
 bridge = CvBridge()  #Convert Image messages between ROS and OPenCV
 
@@ -154,7 +156,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         
         c_red = max(cnts_red, key=cv2.contourArea)
         ((x_red, y_red), radius_red) = cv2.minEnclosingCircle(c_red)
-        # print('RED:Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_red,y_red,radius_red))
+        print('RED:Center of min enclosing circle x={0}, y={1}, radius ={2}'.format(x_red,y_red,radius_red))
        
         boundRect_red = cv2.boundingRect(c_red)
         
@@ -165,7 +167,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         
 		# only proceed if the radius meets a minimum size
         # print('Radius RED is:', radius_red)
-        if radius_red > 10:
+        if radius_red > RADIUS_RED_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
@@ -219,7 +221,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         center_blue = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         # print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
 		# only proceed if the radius meets a minimum size
-        if radius_blue > 10:
+        if radius_blue > RADIUS_BLUE_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')

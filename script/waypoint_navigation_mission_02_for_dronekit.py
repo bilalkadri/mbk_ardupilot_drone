@@ -226,6 +226,7 @@ def main():
         z=waypoints_lap_01[i][2] 
         way_point_index=waypoints_lap_01[i][3]
         set_destination(x,y,z,way_point_index)
+        rospy.set_param('/Lap_Count', 1)
         time.sleep(5)    
         if check_waypoint_reached(x, y, z, way_point_index):
             i += 1
