@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 # Kd (Derivative Gain)
 # limit (controller saturation limit)
 
-THRESHOLD_FOR_DISTANCE_TO_CENTER=100
+THRESHOLD_FOR_DISTANCE_TO_CENTER=150
 HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK= 3.5
 
 controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
