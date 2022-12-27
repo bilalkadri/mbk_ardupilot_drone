@@ -25,6 +25,8 @@ from collections import deque
 #upper_blue = np.array([130,255,255])
 
 dronetype='/mavros'
+RADIUS_RED_THRESHOLD=12
+RADIUS_BLUE_THRESHOLD=12
 
 bridge = CvBridge()  #Convert Image messages between ROS and OPenCV
 
@@ -167,7 +169,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         
 		# only proceed if the radius meets a minimum size
         # print('Radius ED is:', radius_red)
-        if radius_red > 50:
+        if radius_red > RADIUS_RED_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
@@ -221,7 +223,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         center_blue = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         # print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
 		# only proceed if the radius meets a minimum size
-        if radius_blue > 50:
+        if radius_blue > RADIUS_BLUE_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
                 lap_counter = rospy.get_param('/Lap_Count')
