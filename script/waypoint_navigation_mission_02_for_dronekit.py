@@ -242,8 +242,8 @@ def main():
         rospy.set_param('/Lap_Count', 1)
         if check_waypoint_reached(x, y, z, way_point_index):
             i += 1
-
-       
+        lap_counter = rospy.get_param('/Lap_Count')
+        print('Value of the Lap_Count is :=',lap_counter)
 
         print('Water_Reservoir_Location_Saved_Lap_01:',Water_Reservoir_Location_Saved_Lap_01)
         if Water_Reservoir_Location_Saved_Lap_01 and lap_counter==1:
