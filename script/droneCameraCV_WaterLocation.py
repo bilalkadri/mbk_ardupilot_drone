@@ -332,41 +332,41 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     #------------------------------------WATER DISCHARGE LOCATION (RED)----------------------------
     #---------------------------------------------------------------------------------------------
 
-    #Drawing Green coordinate axes i.e. x-axis and y-axis respectively onto the image
-    cv2.line(cv_image_red,(setPointX_red,0),(setPointX_red,height_red),(0,255,0),2)
-    cv2.line(cv_image_red,(0,setPointY_red),(width_red,setPointY_red),(0,255,0),2)
+    # #Drawing Green coordinate axes i.e. x-axis and y-axis respectively onto the image
+    # cv2.line(cv_image_red,(setPointX_red,0),(setPointX_red,height_red),(0,255,0),2)
+    # cv2.line(cv_image_red,(0,setPointY_red),(width_red,setPointY_red),(0,255,0),2)
     
-    #Drawing BLACK lines, showing the exact location of the Target,parallel to x and y axis 
-    cv2.line(cv_image_red,(setPointX_red,y_red),(x_red,y_red),(0,0,0),2)  #line parallel to x-axis
-    cv2.line(cv_image_red,(x_red,setPointY_red),(x_red,y_red),(0,0,0),2)  #line parallel to y-axis 
+    # #Drawing BLACK lines, showing the exact location of the Target,parallel to x and y axis 
+    # cv2.line(cv_image_red,(setPointX_red,y_red),(x_red,y_red),(0,0,0),2)  #line parallel to x-axis
+    # cv2.line(cv_image_red,(x_red,setPointY_red),(x_red,y_red),(0,0,0),2)  #line parallel to y-axis 
     
     
-    cv2.putText(cv_image_red,str(diffX_red),(x_red,setPointY_red),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
-    cv2.putText(cv_image_red,str(diffY_red),(setPointX_red,y_red),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
+    # cv2.putText(cv_image_red,str(diffX_red),(x_red,setPointY_red),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
+    # cv2.putText(cv_image_red,str(diffY_red),(setPointX_red,y_red),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
 
-    #---------------------------------------------------------------------------------------------
-    #------------------------------------WATER RESERVOIR LOCATION (BLUE)--------------------------
-    #---------------------------------------------------------------------------------------------
+    # #---------------------------------------------------------------------------------------------
+    # #------------------------------------WATER RESERVOIR LOCATION (BLUE)--------------------------
+    # #---------------------------------------------------------------------------------------------
 
-    #Drawing Green coordinate axes i.e. x-axis and y-axis respectively onto the image
-    cv2.line(cv_image_blue,(setPointX_blue,0),(setPointX_blue,height_blue),(0,255,0),2)
-    cv2.line(cv_image_blue,(0,setPointY_blue),(width_blue,setPointY_blue),(0,255,0),2)
+    # #Drawing Green coordinate axes i.e. x-axis and y-axis respectively onto the image
+    # cv2.line(cv_image_blue,(setPointX_blue,0),(setPointX_blue,height_blue),(0,255,0),2)
+    # cv2.line(cv_image_blue,(0,setPointY_blue),(width_blue,setPointY_blue),(0,255,0),2)
     
-    #Drawing BLACK lines, showing the exact location of the Target,parallel to x and y axis 
-    cv2.line(cv_image_blue,(setPointX_blue,y_blue),(x_blue,y_blue),(0,0,0),2)  #line parallel to x-axis
-    cv2.line(cv_image_blue,(x_blue,setPointY_blue),(x_blue,y_blue),(0,0,0),2)  #line parallel to y-axis 
+    # #Drawing BLACK lines, showing the exact location of the Target,parallel to x and y axis 
+    # cv2.line(cv_image_blue,(setPointX_blue,y_blue),(x_blue,y_blue),(0,0,0),2)  #line parallel to x-axis
+    # cv2.line(cv_image_blue,(x_blue,setPointY_blue),(x_blue,y_blue),(0,0,0),2)  #line parallel to y-axis 
     
     
-    cv2.putText(cv_image_blue,str(diffX_blue),(x_blue,setPointY_blue),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
-    cv2.putText(cv_image_blue,str(diffY_blue),(setPointX_blue,y_blue),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
+    # cv2.putText(cv_image_blue,str(diffX_blue),(x_blue,setPointY_blue),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
+    # cv2.putText(cv_image_blue,str(diffY_blue),(setPointX_blue,y_blue),cv2.FONT_HERSHEY_PLAIN,1,(255,255,255),2)
 
 
 
-    cv_image_red=cv2.resize(cv_image_red,(320,180))
-    cv2.imshow('Water Discharge Location',cv_image_red)
+    # cv_image_red=cv2.resize(cv_image_red,(320,180))
+    # cv2.imshow('Water Discharge Location',cv_image_red)
     
-    cv_image_blue=cv2.resize(cv_image_blue,(320,180))
-    cv2.imshow('Water Reservoir Location',cv_image_blue)
+    # cv_image_blue=cv2.resize(cv_image_blue,(320,180))
+    # cv2.imshow('Water Reservoir Location',cv_image_blue)
     
 
 
