@@ -25,8 +25,8 @@ from collections import deque
 #upper_blue = np.array([130,255,255])
 
 dronetype='/mavros'
-RADIUS_RED_THRESHOLD=12
-RADIUS_BLUE_THRESHOLD=12
+RADIUS_RED_THRESHOLD=100
+RADIUS_BLUE_THRESHOLD=100
 
 bridge = CvBridge()  #Convert Image messages between ROS and OPenCV
 
