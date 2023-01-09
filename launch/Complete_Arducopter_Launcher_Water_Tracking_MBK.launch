@@ -11,10 +11,16 @@
 <include file="$(find iq_sim)/launch/apm.launch" />
 
 <!--TO START MAVLPROXY , the basic Ground Control Station (GCS)-->
-<node pkg="mbk_ardupilot_drone" type="startsitl.sh" name="mavproxy_bash_file_by_mbk" output="screen" >
+<!-- <node pkg="mbk_ardupilot_drone" type="startsitl.sh" name="mavproxy_bash_file_by_mbk" output="screen" >
     <param name="cmd" value="/home/bilal/startsitl.sh"/>
-</node>
+</node> -->
 
+<!-- Testing the talker ROS Node as a Publisher -->
+
+<!-- <node pkg="mbk_ardupilot_drone" type="talker.py" 
+  
+    name="talker_publisher" output="screen" >
+</node> -->
 
 
 
@@ -23,5 +29,3 @@
 
 
 </launch>
-
-

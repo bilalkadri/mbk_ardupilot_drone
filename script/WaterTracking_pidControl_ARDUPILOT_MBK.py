@@ -13,7 +13,6 @@ from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from pid_controller_mbk import pid_controller
-#import pygame
 from sensor_msgs.msg import NavSatFix
 from mavros_msgs.srv import *
 from mavros_msgs.msg import State
@@ -21,6 +20,7 @@ import math
 import threading
 from pid_controller_mbk import pid_controller
 import matplotlib.pyplot as plt
+from std_msgs.msg import Int32
 
 #-------------------------------------------------------
 #EXPLANATION OF THE pid_controller (Kp,Ki,Kd,limit) parameters
@@ -62,13 +62,21 @@ def pos_sub_callback(pose_sub_data):
     current_pose = pose_sub_data
 
 
+#callback for lap_counter_subscriber
+def lap_counter_callback(msg):
+    global lap_counter
+    lap_counter=msg.data
+
+
+
 def GPS_Position_Callback_function(data_recieve):
+    global lap_counter
     latitude=data_recieve.latitude
     longitude=data_recieve.longitude
     altitude=data_recieve.altitude
 
     #Reading parameters from the ROS Parameter Server       
-    lap_counter = rospy.get_param("/Lap_Count")
+    #lap_counter = rospy.get_param("/Lap_Count")
     Water_Discharge_Location_Detected_Lap_01 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_01")
     Water_Reservoir_Location_Detected_Lap_01 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_01")
 
@@ -91,6 +99,9 @@ def GPS_Position_Callback_function(data_recieve):
         rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
         
 def Water_Discharge_Detected_Callback_function(data_recieve):
+    
+    global lap_counter
+    # lap_counter=0
     #RED
     
     #print('Water Discharge detected')
@@ -115,7 +126,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
     # print('depth Error',depth_Error) 
      
     #Reading parameters from the ROS Parameter Server       
-    lap_counter = rospy.get_param("/Lap_Count")
+    #lap_counter = rospy.get_param("/Lap_Count")
     Water_Discharge_Location_Detected_Lap_02 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_02")
     EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
 
@@ -237,7 +248,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
 
 def Water_Reservoir_Detected_Callback_function(data_recieve):
-    
+    global lap_counter
     global counter_for_BLUE
     #print('Water Reservoir detected')
     #print data_recieve.data[0]
@@ -270,7 +281,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
     # print('depth Error',depth_Error) 
      
     #Reading parameters from the ROS Parameter Server       
-    lap_counter = rospy.get_param("/Lap_Count")
+    # lap_counter = rospy.get_param("/Lap_Count")
     Water_Reservoir_Location_Detected_Lap_02 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_02")
 
     EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
@@ -446,6 +457,12 @@ if __name__ == '__main__':
     pub_BLUE_Data=rospy.Publisher('/Water_Reservoir_Data_for_Controller', Float32MultiArray, queue_size=10)
     
     
+    #defining publisher and subscriber for lap counter
+    # lap_count_publisher=rospy.Publisher('lap_counter_topic',int)
+  
+    lap_counter_subscriber=rospy.Subscriber('lap_counter_topic',Int32,lap_counter_callback)
+
+
     rospy.spin()
 
 

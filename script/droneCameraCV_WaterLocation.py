@@ -15,6 +15,8 @@ import cv2
 import time
 import imutils
 from collections import deque
+from std_msgs.msg import Int32
+
 
 
 # sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
@@ -56,6 +58,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     global x_red,y_red,radius_red
     global Water_Reservoir_Location 
     global Water_Discharge_Location
+    global lap_counter
 
     try:
         cv_image_red = bridge.imgmsg_to_cv2(img_msg, "passthrough")
@@ -170,7 +173,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         if radius_red > RADIUS_RED_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
-                lap_counter = rospy.get_param('/Lap_Count')
+                # lap_counter = rospy.get_param('/Lap_Count')
         
                 if lap_counter==1:
                     rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',1)
@@ -178,7 +181,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
                     rospy.set_param('/Waypoint_Index_After_which_RED_was_detected',index)
 
 
-                if (not(Water_Released_by_Syringes_local_variable) and (lap_counter>1)):
+                if (not(Water_Released_by_Syringes_local_variable) and (lap_counter)>1):
                     rospy.set_param('/Water_Discharge_Location_Detected_Lap_02',1)
 
                 # draw the circle and centroid on the frame,
@@ -224,14 +227,14 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         if radius_blue > RADIUS_BLUE_THRESHOLD:
                 
                 #Setting the parameter on the ROS Parameter Server
-                lap_counter = rospy.get_param('/Lap_Count')
+                # lap_counter = rospy.get_param('/Lap_Count')
 
                 if lap_counter==1:
                     rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',1)
                     index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
                     rospy.set_param('/Waypoint_Index_After_which_BLUE_was_detected',index)
 
-                if (not(Water_Sucked_by_Syringes_local_variable) and (lap_counter>1)):
+                if (not(Water_Sucked_by_Syringes_local_variable) and int(lap_counter)>1):
                     rospy.set_param('/Water_Reservoir_Location_Detected_Lap_02',1)
 
                 
@@ -371,12 +374,16 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 
     cv2.waitKey(1)
 
+#callback for lap_counter_subscriber
+def lap_counter_callback(msg):
+    global lap_counter
+    lap_counter=msg.data
 
 
 
 if __name__ == '__main__':
     
-    
+    global lap_counter
     global Water_Reservoir_Location
     global Water_Discharge_Location
     
@@ -407,10 +414,13 @@ if __name__ == '__main__':
     #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)
     #pub_land = rospy.Publisher(dronetype+"/land", Empty, queue_size=10)
     
-    #if dronetype=='/ardrone':
-    #    pub_move = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-    #else:
-    #    pub_move = rospy.Publisher(dronetype+'/cmd_vel', Twist, queue_size=10)
+
+    #defining publisher and subscriber for lap counter
+    # lap_count_publisher=rospy.Publisher('lap_counter_topic',int)
+    #lap_count_publisher.publish(0)
+  
+    lap_counter_subscriber=rospy.Subscriber('lap_counter_topic',Int32,lap_counter_callback)
+
 
     
     rospy.spin()

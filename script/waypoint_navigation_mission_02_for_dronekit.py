@@ -4,20 +4,21 @@ from inspect import FullArgSpec
 from pickle import FALSE, TRUE
 # Import ROS.
 import rospy
-# Import the API.
-
-
 from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
 import time
 import math
 from pymavlink import mavutil
 import numpy as np
-import imutils
+# import imutils
 from collections import deque
 from std_msgs.msg import Float32MultiArray
-import sys
+from std_msgs.msg import Int32
+# import sys
 import time
 import rospy
+import logging
+import threading
+
 
 takeoff_alt = 5
 
@@ -116,14 +117,38 @@ def arm_and_takeoff(aTargetAltitude):
         time.sleep(1)
 
 
+def lap_counter_publisher_thread_func(name):
+    global lap_counter
+    logging.info("Thread %s: starting", name)
+    # pub = rospy.Publisher('chatter', String, queue_size=10)
+      #defining publisher and subscriber for lap counter
+    # lap_count_publisher=rospy.Publisher('lap_counter_topic', int)
+    lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
+    
+   
+    rate = rospy.Rate(10)  # 10hz
+    # lap_count_publisher.publish(lap_counter)
+    while not rospy.is_shutdown():
+        # hello_str = "hello world %s" % rospy.get_time()
+        # rospy.loginfo(hello_str)
+        # pub.publish(hello_str)
+        lap_count_publisher.publish(lap_counter)
+        rate.sleep()
+
 def main():
     # Initializing ROS node.
+    global lap_counter
+    lap_counter=0
+    global vehicle
     rospy.init_node("Waypoint_Navigation", anonymous=True)
 
- 
-    # Specify control loop rate. We recommend a low frequency to not over load the FCU with messages. Too many messages will cause the drone to be sluggish.
-    # rate = rospy.Rate(0.1)
-    global vehicle
+    lap_counter_publisher_thread = threading.Thread(target=lap_counter_publisher_thread_func, args=(1,))
+    # logging.info("Main    : before running thread")
+    lap_counter_publisher_thread.start()
+    #defining publisher and subscriber for lap counter
+    # lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
+  
+     
 
     # Connect to the Vehicle
     # connection_string = '/dev/ttyUSB0'
@@ -137,6 +162,7 @@ def main():
     arm_and_takeoff(takeoff_alt)
 
     print("Starting Python Waypoint Navigation")
+    
     # set_destination(-35.3632188, 149.1658468, 5, 1)       #Arguments: latitutde, longitude, relative altitude, waypoint number
     # set_destination(24.7944000, 67.1352048,5,1)
     # vehicle.simple_goto(LocationGlobalRelative(-35.3632188, 149.1658468, 5))
@@ -215,7 +241,9 @@ def main():
     
     TOTAL_WAYPOINTS_LAP_01=len(waypoints_lap_01)
     while i< TOTAL_WAYPOINTS_LAP_01:
-        lap_counter = rospy.get_param('/Lap_Count')
+        #lap_counter = rospy.get_param('/Lap_Count')
+        # lap_count_publisher.publish(0)
+        # lap_counter=0
         rospy.set_param('/Current_Waypoint_Index_Lap_01',i)
         
         Water_Discharge_Location_Saved_Lap_01=rospy.get_param('Water_Discharge_Location_Saved')
@@ -226,7 +254,10 @@ def main():
         z=waypoints_lap_01[i][2] 
         way_point_index=waypoints_lap_01[i][3]
         set_destination(x,y,z,way_point_index)
-        rospy.set_param('/Lap_Count', 1)
+        # rospy.set_param('/Lap_Count', 1)
+        # lap_count_publisher.publish(1)
+        lap_counter=1
+
         time.sleep(5)    
         if check_waypoint_reached(x, y, z, way_point_index):
             i += 1
@@ -258,13 +289,15 @@ def main():
 
     print(waypoints_lap_02)
     i=0
-    rospy.set_param('/Lap_Count', 2)
+    # rospy.set_param('/Lap_Count', 2)
+    lap_counter=2
     TOTAL_WAYPOINTS_LAP_02=len(waypoints_lap_02)
     
     while i < TOTAL_WAYPOINTS_LAP_02:
 
-        lap_counter = rospy.get_param('/Lap_Count')
-        #print('Lap Count=',lap_counter)
+        # lap_counter = rospy.get_param('/Lap_Count')
+        
+        print('Lap Count=',lap_counter)
         #rospy.loginfo('Water Reservoir',Water_Reservoir_Location_Detected_local_variable)
 
         Water_Reservoir_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Reservoir_Location_Detected_Lap_02')
