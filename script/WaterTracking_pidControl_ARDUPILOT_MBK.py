@@ -21,6 +21,8 @@ import threading
 from pid_controller_mbk import pid_controller
 import matplotlib.pyplot as plt
 from std_msgs.msg import Int32
+import logging
+
 
 #-------------------------------------------------------
 #EXPLANATION OF THE pid_controller (Kp,Ki,Kd,limit) parameters
@@ -48,14 +50,7 @@ twist=TwistStamped()
 theta=0
 water_detected=0 #flag for water detection
 current_pose = PoseStamped()
-# currentX_BLUE_Vector=[] 
-# currentY_BLUE_Vector=[] 
-# setPointX_BLUE_Vector=[]
-# setPointY_BLUE_Vector=[]
-# X_Error_BLUE_Vector=[]
-# Y_Error_BLUE_Vector=[]
-# counter_for_BLUE=0
-# index_BLUE_Vector=[]
+
 
 def pos_sub_callback(pose_sub_data):
     global current_pose
@@ -70,7 +65,14 @@ def lap_counter_callback(msg):
 
 
 def GPS_Position_Callback_function(data_recieve):
-    global lap_counter
+    global   lap_counter
+    global   Water_Discharge_Location_Latitude
+    global   Water_Discharge_Location_Longitude
+    global   Water_Discharge_Location_Altitude
+    global   Water_Reservoir_Location_Latitude
+    global   Water_Reservoir_Location_Longitude
+    global   Water_Reservoir_Location_Altitude
+
     latitude=data_recieve.latitude
     longitude=data_recieve.longitude
     altitude=data_recieve.altitude
@@ -83,18 +85,27 @@ def GPS_Position_Callback_function(data_recieve):
        #Saving the GPS location of the Water_Discharge_Location to ROS parameter server 
     if (lap_counter ==1 and Water_Discharge_Location_Detected_Lap_01):
      
-        rospy.set_param('/Water_Discharge_Location_Latitude',latitude)
-        rospy.set_param('/Water_Discharge_Location_Longitude', longitude)
-        rospy.set_param('/Water_Discharge_Location_Altitude' ,altitude)
+        # rospy.set_param('/Water_Discharge_Location_Latitude',latitude)
+        # rospy.set_param('/Water_Discharge_Location_Longitude', longitude)
+        # rospy.set_param('/Water_Discharge_Location_Altitude' ,altitude)
+        Water_Discharge_Location_Latitude=latitude
+        Water_Discharge_Location_Longitude=longitude
+        Water_Discharge_Location_Altitude=altitude
+
+
         rospy.set_param('/Water_Discharge_Location_Saved',1)
         rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
 
 
       #Saving the GPS location of the Water_Reservoir_Location to ROS parameter server 
     if (lap_counter ==1 and Water_Reservoir_Location_Detected_Lap_01):
-        rospy.set_param('/Water_Reservoir_Location_Latitude', latitude)
-        rospy.set_param('/Water_Reservoir_Location_Longitude' ,longitude)
-        rospy.set_param('/Water_Reservoir_Location_Altitude ',altitude)
+        # rospy.set_param('/Water_Reservoir_Location_Latitude', latitude)
+        # rospy.set_param('/Water_Reservoir_Location_Longitude' ,longitude)
+        # rospy.set_param('/Water_Reservoir_Location_Altitude ',altitude)
+        Water_Reservoir_Location_Latitude=latitude
+        Water_Reservoir_Location_Longitude=longitude
+        Water_Reservoir_Location_Altitude=altitude
+
         rospy.set_param('/Water_Reservoir_Location_Saved',1)
         rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
         
@@ -426,7 +437,36 @@ def timeout():
 
     # Do something      
          
+def GPS_publisher_thread_func(name):
 
+    #Defining two publishers in this thread which will keep on updating the GPS coordinates
+    # of the Water_Discharge_Location and Water_Reservoir_Location
+    global   lap_counter
+    global   Water_Discharge_Location_Latitude
+    global   Water_Discharge_Location_Longitude
+    global   Water_Discharge_Location_Altitude
+    global   Water_Reservoir_Location_Latitude
+    global   Water_Reservoir_Location_Longitude
+    global   Water_Reservoir_Location_Altitude
+    
+    logging.info("Thread %s: starting", name)
+
+    Water_Discharge_Location_GPS_publisher=rospy.Publisher('Water_Discharge_Location_GPS_topic', Float32MultiArray,queue_size=10)
+    WDL_array =[Water_Discharge_Location_Latitude,Water_Discharge_Location_Longitude,Water_Discharge_Location_Altitude ]
+    WDL_dataToSend=Float32MultiArray(data=WDL_array)
+   
+    Water_Reservoir_Location_GPS_publisher=rospy.Publisher('Water_Reservoir_Location_GPS_topic', Float32MultiArray,queue_size=10)
+    WRL_array =[Water_Reservoir_Location_Latitude,Water_Reservoir_Location_Longitude,Water_Reservoir_Location_Altitude ]
+    WRL_dataToSend=Float32MultiArray(data=WRL_array)
+   
+
+    rate = rospy.Rate(10)  # 10hz
+    # lap_count_publisher.publish(lap_counter)
+    while not rospy.is_shutdown():
+
+        Water_Discharge_Location_GPS_publisher.publish(WDL_dataToSend)
+        Water_Reservoir_Location_GPS_publisher.publish(WRL_dataToSend)
+        rate.sleep()
 
 if __name__ == '__main__':
     
@@ -435,16 +475,18 @@ if __name__ == '__main__':
     rospy.init_node('Water_Tracking_PID_Controller')
         
     reciever=rospy.Subscriber("/Water_Reservoir_Location_Topic",Float32MultiArray,Water_Reservoir_Detected_Callback_function,queue_size=10)
-    timer = threading.Timer(0.1,timeout) # If 0.1 seconds elapse and no message received on the topic, call timeout()
-    timer.start()    
-
+   
     reciever=rospy.Subscriber("/Water_Discharge_Location_Topic",Float32MultiArray,Water_Discharge_Detected_Callback_function,queue_size=10)
 
     reciever=rospy.Subscriber("/mavros/global_position/global",NavSatFix,GPS_Position_Callback_function,queue_size=10)
 
-
     local_position_subscribe = rospy.Subscriber(dronetype+'/local_position/pose', PoseStamped, pos_sub_callback)    
     
+
+    #Publishing the GPS 
+    GPS_publisher_thread = threading.Thread(target=GPS_publisher_thread_func, args=(1,))
+    # logging.info("Main    : before running thread")
+    GPS_publisher_thread.start()
 
     #We will takeoff and land using Anis Kouba's Code for generating comand to MavProxy (dronemap_control_using_MAVROS)
     #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)

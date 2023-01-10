@@ -135,9 +135,37 @@ def lap_counter_publisher_thread_func(name):
         lap_count_publisher.publish(lap_counter)
         rate.sleep()
 
+def Water_Discharge_Location_GPS_Callback_function(data_recieve):
+    global   Water_Discharge_Location_Latitude
+    global   Water_Discharge_Location_Longitude
+    global   Water_Discharge_Location_Altitude
+
+    Water_Discharge_Location_Latitude=data_recieve.data[0]   
+    Water_Discharge_Location_Longitude=data_recieve.data[1] 
+    Water_Discharge_Location_Altitude=data_recieve.data[2]
+
+
+
+def Water_Reservoir_Location_GPS_Callback_function(data_recieve):
+    global   Water_Reservoir_Location_Latitude
+    global   Water_Reservoir_Location_Longitude
+    global   Water_Reservoir_Location_Altitude
+    
+    Water_Reservoir_Location_Latitude=data_recieve.data[0]   
+    Water_Reservoir_Location_Longitude=data_recieve.data[1] 
+    Water_Reservoir_Location_Altitude=data_recieve.data[2]
+
 def main():
     # Initializing ROS node.
-    global lap_counter
+    global   lap_counter
+    global   Water_Discharge_Location_Latitude
+    global   Water_Discharge_Location_Longitude
+    global   Water_Discharge_Location_Altitude
+    global   Water_Reservoir_Location_Latitude
+    global   Water_Reservoir_Location_Longitude
+    global   Water_Reservoir_Location_Altitude
+    
+          
     lap_counter=0
     global vehicle
     rospy.init_node("Waypoint_Navigation", anonymous=True)
@@ -148,6 +176,10 @@ def main():
     #defining publisher and subscriber for lap counter
     # lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
   
+    Water_Discharge_Location_GPS_subscriber=rospy.Subscriber("/Water_Discharge_Location_GPS_topic",Float32MultiArray,Water_Discharge_Location_GPS_Callback_function,queue_size=10)
+   
+    Water_Reservoir_Location_GPS_subscriber=rospy.Subscriber("/Water_Reservoir_Location_GPS_topic",Float32MultiArray,Water_Reservoir_Location_GPS_Callback_function,queue_size=10)
+
      
 
     # Connect to the Vehicle
@@ -267,8 +299,8 @@ def main():
         print('Water_Reservoir_Location_Saved_Lap_01:',Water_Reservoir_Location_Saved_Lap_01)
         if Water_Reservoir_Location_Saved_Lap_01 and lap_counter==1:
             if ENTRY_FLAG_01==1:
-                Latitude=rospy.get_param('/Water_Reservoir_Location_Latitude')
-                Longitude=rospy.get_param('/Water_Reservoir_Location_Longitude')
+                Latitude=Water_Reservoir_Location_Latitude
+                Longitude=Water_Reservoir_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Reservoir_Location_Altitude')
                 index=rospy.get_param('/Waypoint_Index_After_which_BLUE_was_detected')
                 waypoints_lap_02.insert(index,[Latitude,Longitude,Altitude,index])
@@ -279,8 +311,8 @@ def main():
  
         if Water_Discharge_Location_Saved_Lap_01 and lap_counter==1:
             if ENTRY_FLAG_02==1:
-                Latitude=rospy.get_param('/Water_Discharge_Location_Latitude')
-                Longitude=rospy.get_param('/Water_Discharge_Location_Longitude')
+                Latitude=Water_Discharge_Location_Latitude
+                Longitude=Water_Discharge_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Discharge_Location_Altitude')
                 index=rospy.get_param('/Waypoint_Index_After_which_RED_was_detected')
                 waypoints_lap_02.insert(index+1,[Latitude,Longitude,Altitude,index+1]) #If we use index the RED location will be inserted before waypoint 3 which will be incorrect
