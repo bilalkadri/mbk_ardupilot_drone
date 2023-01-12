@@ -16,6 +16,8 @@ import time
 import imutils
 from collections import deque
 from std_msgs.msg import Int32
+import logging
+import threading
 
 
 
@@ -54,11 +56,18 @@ def nothing(x):
 
 def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     
-    global x_blue,y_blue,radius_blue
-    global x_red,y_red,radius_red
-    global Water_Reservoir_Location 
-    global Water_Discharge_Location
-    global lap_counter
+    global   x_blue,y_blue,radius_blue
+    global   x_red,y_red,radius_red
+    global   Water_Reservoir_Location 
+    global   Water_Discharge_Location
+    global   lap_counter
+    global   Water_Discharge_Location_Detected_Lap_01 
+    global   Water_Reservoir_Location_Detected_Lap_01 
+    global   Water_Discharge_Location_Detected_Lap_02
+    global   Water_Reservoir_Location_Detected_Lap_02 
+    global   Current_Waypoint_Index_Lap_01
+    global   Waypoint_Index_After_which_BLUE_was_detected
+    global   Waypoint_Index_After_which_RED_was_detected
 
     try:
         cv_image_red = bridge.imgmsg_to_cv2(img_msg, "passthrough")
@@ -150,9 +159,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         #Getting the  Water_Released_by_Syringes variable on Prameter_Server
         Water_Released_by_Syringes_local_variable=rospy.get_param("/Water_Released_by_Syringes")
         
-
-        
-        
+      
 		# find the largest contour in the mask, then use
 		# it to compute the minimum enclosing circle and
 		# centroid
@@ -176,13 +183,16 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
                 # lap_counter = rospy.get_param('/Lap_Count')
         
                 if lap_counter==1:
-                    rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',1)
-                    index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
-                    rospy.set_param('/Waypoint_Index_After_which_RED_was_detected',index)
+                    Water_Discharge_Location_Detected_Lap_01=1
+                    # index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
+                    index=Current_Waypoint_Index_Lap_01
+                    # rospy.set_param('/Waypoint_Index_After_which_RED_was_detected',index)
+                    Waypoint_Index_After_which_RED_was_detected=index
 
 
                 if (not(Water_Released_by_Syringes_local_variable) and (lap_counter)>1):
-                    rospy.set_param('/Water_Discharge_Location_Detected_Lap_02',1)
+                    Water_Discharge_Location_Detected_Lap_02=1
+                    # rospy.set_param('/Water_Discharge_Location_Detected_Lap_02',1)
 
                 # draw the circle and centroid on the frame,
                 # then update the list of tracked points
@@ -225,17 +235,19 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         # print('Centroid of the Contour=({0},{1})'.format(center_blue[0],center_blue[1]))
 		# only proceed if the radius meets a minimum size
         if radius_blue > RADIUS_BLUE_THRESHOLD:
-                
                 #Setting the parameter on the ROS Parameter Server
                 # lap_counter = rospy.get_param('/Lap_Count')
 
                 if lap_counter==1:
-                    rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',1)
-                    index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
-                    rospy.set_param('/Waypoint_Index_After_which_BLUE_was_detected',index)
+                    Water_Reservoir_Location_Detected_Lap_01 =1
+                    # index=rospy.get_param('/Current_Waypoint_Index_Lap_01')
+                    index=Current_Waypoint_Index_Lap_01
+                    # rospy.set_param('/Waypoint_Index_After_which_BLUE_was_detected',index)
+                    Waypoint_Index_After_which_BLUE_was_detected=index
 
                 if (not(Water_Sucked_by_Syringes_local_variable) and int(lap_counter)>1):
-                    rospy.set_param('/Water_Reservoir_Location_Detected_Lap_02',1)
+                    # rospy.set_param('/Water_Reservoir_Location_Detected_Lap_02',1)
+                    Water_Reservoir_Location_Detected_Lap_02=1
 
                 
                 # draw the circle and centroid on the frame,
@@ -379,6 +391,37 @@ def lap_counter_callback(msg):
     global lap_counter
     lap_counter=msg.data
 
+#callback for Current_Waypoint_Index_Lap_01_subscriber
+def Current_Waypoint_Index_Lap_01_callback(msg):
+    global   Current_Waypoint_Index_Lap_01
+    Current_Waypoint_Index_Lap_01=msg.data
+
+
+
+def WDL_WRL_Parameters_publisher_thread_func(name):
+    global   Water_Discharge_Location_Detected_Lap_01 
+    global   Water_Reservoir_Location_Detected_Lap_01 
+    global   Water_Discharge_Location_Detected_Lap_02
+    global   Water_Reservoir_Location_Detected_Lap_02 
+    global   Waypoint_Index_After_which_BLUE_was_detected
+    global   Waypoint_Index_After_which_RED_was_detected
+
+    logging.info("Thread %s: starting", name)
+    WDL_WRL_Parameters_publisher=rospy.Publisher('WDL_WRL_Parameters_topic', Float32MultiArray,queue_size=10)
+  
+
+    rate = rospy.Rate(10)  # 10hz
+    # lap_count_publisher.publish(lap_counter)
+    while not rospy.is_shutdown():
+        WDL_WRL_Parameters =[Water_Discharge_Location_Detected_Lap_01 ,
+                             Water_Reservoir_Location_Detected_Lap_01,
+                             Water_Discharge_Location_Detected_Lap_02,
+                             Water_Reservoir_Location_Detected_Lap_02,
+                             Waypoint_Index_After_which_BLUE_was_detected,
+                             Waypoint_Index_After_which_RED_was_detected ]
+        WDL_WRL_Parameters_dataToSend=Float32MultiArray(data=WDL_WRL_Parameters)
+        WDL_WRL_Parameters_publisher.publish(WDL_WRL_Parameters_dataToSend)
+        rate.sleep()
 
 
 if __name__ == '__main__':
@@ -386,7 +429,12 @@ if __name__ == '__main__':
     global lap_counter
     global Water_Reservoir_Location
     global Water_Discharge_Location
+    global Water_Discharge_Location_Detected_Lap_01 
+    global Water_Reservoir_Location_Detected_Lap_01 
+    global Current_Waypoint_Index_Lap_01
     
+    Water_Discharge_Location_Detected_Lap_01 =0
+    Water_Reservoir_Location_Detected_Lap_01 =0 
     #name of the node is "Water_Reservoir_Discharge_Location_Identification"
     rospy.init_node('Water_Reservoir_Discharge_Location_Identification')   
       
@@ -407,21 +455,16 @@ if __name__ == '__main__':
 
     imageSub=rospy.Subscriber(dronetype+"/image_raw",Image,Water_Reservoir_Discharge_Location_Identification_CallBack)
 
-    #bottomimageSub=rospy.Subscriber(dronetype+"/bottom/image_raw",Image,BottomImageCallBack)
-
-    #I don't understand the meaning of these two lines 
-    #Why he is publishing Empty messages on takeoff and land
-    #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)
-    #pub_land = rospy.Publisher(dronetype+"/land", Empty, queue_size=10)
-    
-
-    #defining publisher and subscriber for lap counter
-    # lap_count_publisher=rospy.Publisher('lap_counter_topic',int)
-    #lap_count_publisher.publish(0)
-  
+   
+    #defining subscriber for lap counter
     lap_counter_subscriber=rospy.Subscriber('lap_counter_topic',Int32,lap_counter_callback)
 
+    #defining subscriber for  Current_Waypoint_Index_Lap_01
+    Current_Waypoint_Index_Lap_01_subscriber=rospy.Subscriber('Current_Waypoint_Index_Lap_01_topic',Int32,Current_Waypoint_Index_Lap_01_callback)
 
+    #Publishing the WRL,WDL Parameters using a separate thread
+    GPS_publisher_thread = threading.Thread(target=WDL_WRL_Parameters_publisher_thread_func, args=(1,))
+    GPS_publisher_thread.start()
     
     rospy.spin()
     

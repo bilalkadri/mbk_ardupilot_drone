@@ -118,21 +118,20 @@ def arm_and_takeoff(aTargetAltitude):
 
 
 def lap_counter_publisher_thread_func(name):
-    global lap_counter
+    global   lap_counter
+    global   Current_Waypoint_Index_Lap_01
     logging.info("Thread %s: starting", name)
     # pub = rospy.Publisher('chatter', String, queue_size=10)
       #defining publisher and subscriber for lap counter
     # lap_count_publisher=rospy.Publisher('lap_counter_topic', int)
     lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
-    
+    Current_Waypoint_Index_Lap_01_publisher=rospy.Publisher('Current_Waypoint_Index_Lap_01_topic', Int32,queue_size=10)
    
     rate = rospy.Rate(10)  # 10hz
     # lap_count_publisher.publish(lap_counter)
     while not rospy.is_shutdown():
-        # hello_str = "hello world %s" % rospy.get_time()
-        # rospy.loginfo(hello_str)
-        # pub.publish(hello_str)
         lap_count_publisher.publish(lap_counter)
+        Current_Waypoint_Index_Lap_01_publisher.publish(Current_Waypoint_Index_Lap_01)
         rate.sleep()
 
 def Water_Discharge_Location_GPS_Callback_function(data_recieve):
@@ -155,8 +154,37 @@ def Water_Reservoir_Location_GPS_Callback_function(data_recieve):
     Water_Reservoir_Location_Longitude=data_recieve.data[1] 
     Water_Reservoir_Location_Altitude=data_recieve.data[2]
 
+
+#subscriber callback for WDL_WRL_Parameters subscriber
+def WDL_WRL_Parameters_callback(msg):
+    global   Water_Discharge_Location_Detected_Lap_01 
+    global   Water_Reservoir_Location_Detected_Lap_01 
+    global   Water_Discharge_Location_Detected_Lap_02
+    global   Water_Reservoir_Location_Detected_Lap_02 
+    global   Waypoint_Index_After_which_BLUE_was_detected
+    global   Waypoint_Index_After_which_RED_was_detected 
+
+
+    Water_Discharge_Location_Detected_Lap_01    =msg.data[0]
+    Water_Reservoir_Location_Detected_Lap_01    =msg.data[1]
+    Water_Discharge_Location_Detected_Lap_02    =msg.data[2]
+    Water_Reservoir_Location_Detected_Lap_02    =msg.data[3]
+    Waypoint_Index_After_which_BLUE_was_detected=msg.data[4]
+    Waypoint_Index_After_which_RED_was_detected =msg.data[5]
+
+#subscriber callback for WDL_WRL_Location_Saved subscriber
+def WDL_WRL_Location_Saved_Callback_function(msg):
+    global   Water_Discharge_Location_Saved
+    global   Water_Reservoir_Location_Saved
+
+    Water_Discharge_Location_Saved=msg.data[0]
+    Water_Reservoir_Location_Saved=msg.data[1]
+
+
 def main():
     # Initializing ROS node.
+    #Defining global variables  
+    global   vehicle
     global   lap_counter
     global   Water_Discharge_Location_Latitude
     global   Water_Discharge_Location_Longitude
@@ -164,23 +192,35 @@ def main():
     global   Water_Reservoir_Location_Latitude
     global   Water_Reservoir_Location_Longitude
     global   Water_Reservoir_Location_Altitude
+    global   Current_Waypoint_Index_Lap_01
+    global   Water_Discharge_Location_Detected_Lap_01 
+    global   Water_Reservoir_Location_Detected_Lap_01 
+    global   Water_Discharge_Location_Detected_Lap_02
+    global   Water_Reservoir_Location_Detected_Lap_02 
+    global   Waypoint_Index_After_which_BLUE_was_detected
+    global   Waypoint_Index_After_which_RED_was_detected 
+    global   Water_Discharge_Location_Saved
+    global   Water_Reservoir_Location_Saved
     
           
     lap_counter=0
-    global vehicle
+    Current_Waypoint_Index_Lap_01=0
+    
     rospy.init_node("Waypoint_Navigation", anonymous=True)
 
+    #This thread will publish the 'lap_counter' values
     lap_counter_publisher_thread = threading.Thread(target=lap_counter_publisher_thread_func, args=(1,))
-    # logging.info("Main    : before running thread")
     lap_counter_publisher_thread.start()
-    #defining publisher and subscriber for lap counter
-    # lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
+  
+    #defining subscriber for WRL, WDL Parameters
+    WRL_WDL_Parameters_subscriber=rospy.Subscriber('/WDL_WRL_Parameters_topic',Float32MultiArray,WDL_WRL_Parameters_callback)
   
     Water_Discharge_Location_GPS_subscriber=rospy.Subscriber("/Water_Discharge_Location_GPS_topic",Float32MultiArray,Water_Discharge_Location_GPS_Callback_function,queue_size=10)
    
     Water_Reservoir_Location_GPS_subscriber=rospy.Subscriber("/Water_Reservoir_Location_GPS_topic",Float32MultiArray,Water_Reservoir_Location_GPS_Callback_function,queue_size=10)
 
-     
+    WRL_WDL_Location_Saved_subscriber=rospy.Subscriber("/WDL_WRL_Location_Saved_topic",Float32MultiArray,WDL_WRL_Location_Saved_Callback_function,queue_size=10)
+
 
     # Connect to the Vehicle
     # connection_string = '/dev/ttyUSB0'
@@ -276,10 +316,14 @@ def main():
         #lap_counter = rospy.get_param('/Lap_Count')
         # lap_count_publisher.publish(0)
         # lap_counter=0
-        rospy.set_param('/Current_Waypoint_Index_Lap_01',i)
+        Current_Waypoint_Index_Lap_01=i
         
-        Water_Discharge_Location_Saved_Lap_01=rospy.get_param('Water_Discharge_Location_Saved')
-        Water_Reservoir_Location_Saved_Lap_01=rospy.get_param('Water_Reservoir_Location_Saved')
+        # Water_Discharge_Location_Saved_Lap_01=rospy.get_param('Water_Discharge_Location_Saved')
+        # Water_Reservoir_Location_Saved_Lap_01=rospy.get_param('Water_Reservoir_Location_Saved')
+
+        Water_Discharge_Location_Saved_Lap_01=Water_Discharge_Location_Saved
+        Water_Reservoir_Location_Saved_Lap_01=Water_Reservoir_Location_Saved
+
 
         x=waypoints_lap_01[i][0]
         y=waypoints_lap_01[i][1]
@@ -302,7 +346,7 @@ def main():
                 Latitude=Water_Reservoir_Location_Latitude
                 Longitude=Water_Reservoir_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Reservoir_Location_Altitude')
-                index=rospy.get_param('/Waypoint_Index_After_which_BLUE_was_detected')
+                index=Waypoint_Index_After_which_BLUE_was_detected
                 waypoints_lap_02.insert(index,[Latitude,Longitude,Altitude,index])
                 print('I am inserting the BLUE''s GPS location in the waypoints_lap_02 at index:',index)
                 ENTRY_FLAG_01=0
@@ -314,7 +358,7 @@ def main():
                 Latitude=Water_Discharge_Location_Latitude
                 Longitude=Water_Discharge_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Discharge_Location_Altitude')
-                index=rospy.get_param('/Waypoint_Index_After_which_RED_was_detected')
+                index=Waypoint_Index_After_which_RED_was_detected
                 waypoints_lap_02.insert(index+1,[Latitude,Longitude,Altitude,index+1]) #If we use index the RED location will be inserted before waypoint 3 which will be incorrect
                 print('I am inserting the RED''s GPS location in the waypoints_lap_02 at index',index)
                 ENTRY_FLAG_02=0
@@ -332,17 +376,18 @@ def main():
         print('Lap Count=',lap_counter)
         #rospy.loginfo('Water Reservoir',Water_Reservoir_Location_Detected_local_variable)
 
-        Water_Reservoir_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Reservoir_Location_Detected_Lap_02')
-        Water_Discharge_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Discharge_Location_Detected_Lap_02')
+        # Water_Reservoir_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Reservoir_Location_Detected_Lap_02')
+        # Water_Discharge_Location_Detected_local_variable_Lap_02=rospy.get_param('/Water_Discharge_Location_Detected_Lap_02')
         
+        Water_Reservoir_Location_Detected_local_variable_Lap_02=Water_Reservoir_Location_Detected_Lap_02
+        Water_Discharge_Location_Detected_local_variable_Lap_02=Water_Discharge_Location_Detected_Lap_02
+        
+
         condition=(not Water_Reservoir_Location_Detected_local_variable_Lap_02) and  (not Water_Discharge_Location_Detected_local_variable_Lap_02) 
      #     #condition= 1 and 1
      #     #print('If condition result',condition)
         rate1 = rospy.Rate(0.1) # ROS Rate at 5Hz
-        # if condition:
-        #     print('I am executing the PID controller')
-        # elif not(condition):
-        #     print('I am executing waypoint number :{0}'.format(i))
+
         if condition:
             x=waypoints_lap_02[i][0]
             y=waypoints_lap_02[i][1]
@@ -366,8 +411,7 @@ def main():
     #Close vehicle object before exiting script
     print("Close vehicle object")
     vehicle.close()
-    # Land after all waypoints is reached.
-    # drone.land()
+   
     # rospy.loginfo(CGREEN2 + "All waypoints reached landing now." + CEND)
 
 
