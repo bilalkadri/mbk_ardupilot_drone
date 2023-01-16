@@ -58,8 +58,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     
     global   x_blue,y_blue,radius_blue
     global   x_red,y_red,radius_red
-    global   Water_Reservoir_Location 
-    global   Water_Discharge_Location
+    global   Water_Reservoir_Location_publisher
+    global   Water_Discharge_Location_publisher
     global   lap_counter
     global   Water_Discharge_Location_Detected_Lap_01 
     global   Water_Reservoir_Location_Detected_Lap_01 
@@ -68,9 +68,12 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     global   Current_Waypoint_Index_Lap_01
     global   Waypoint_Index_After_which_BLUE_was_detected
     global   Waypoint_Index_After_which_RED_was_detected
+    global   Water_Released_by_Syringes
+    global   Water_Sucked_by_Syringes
+    
 
     try:
-        cv_image_red = bridge.imgmsg_to_cv2(img_msg, "passthrough")
+        cv_image_red  = bridge.imgmsg_to_cv2(img_msg, "passthrough")
         cv_image_blue = bridge.imgmsg_to_cv2(img_msg, "passthrough")
          
     except CvBridgeError as e:
@@ -79,7 +82,7 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 
    
     
-    height_red,width_red,channel = cv_image_red.shape
+    height_red,width_red,channel   = cv_image_red.shape
     height_blue,width_blue,channel = cv_image_blue.shape
 
     #The image coming from ROS which has been converted into OpenCV by using 'bridge.imgmsg_to_cv2' will be 
@@ -157,8 +160,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         # Water_Released_by_Syringes : 0
         
         #Getting the  Water_Released_by_Syringes variable on Prameter_Server
-        Water_Released_by_Syringes_local_variable=rospy.get_param("/Water_Released_by_Syringes")
-        
+        # Water_Released_by_Syringes_local_variable=rospy.get_param("/Water_Released_by_Syringes")
+        Water_Released_by_Syringes_local_variable=Water_Released_by_Syringes
       
 		# find the largest contour in the mask, then use
 		# it to compute the minimum enclosing circle and
@@ -214,8 +217,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
         # Water_Released_by_Syringes : 0
         
         #Getting the  Water_Sucked_by_Syringes variable from Prameter_Server
-        Water_Sucked_by_Syringes_local_variable=rospy.get_param("/Water_Sucked_by_Syringes")
-        
+        # Water_Sucked_by_Syringes_local_variable=rospy.get_param("/Water_Sucked_by_Syringes")
+        Water_Sucked_by_Syringes_local_variable=Water_Sucked_by_Syringes
         
         # find the largest contour in the mask, then use
 		# it to compute the minimum enclosing circle and a bounding rectangle
@@ -328,8 +331,8 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
     dataToSend_red=Float32MultiArray(data=array_red)
     dataToSend_blue=Float32MultiArray(data=array_blue)
     
-    Water_Reservoir_Location.publish(dataToSend_blue)
-    Water_Discharge_Location.publish(dataToSend_red)
+    Water_Reservoir_Location_publisher.publish(dataToSend_blue)
+    Water_Discharge_Location_publisher.publish(dataToSend_red)
 
     #These variable have nothing to do with the Controller or anything, it is just for display purpose
     diffX_blue=x_blue-setPointX_blue  #What is the reason for this variable,no valid reason, it can be setPointX-x as well, it is just to show the text on the image
@@ -386,18 +389,24 @@ def Water_Reservoir_Discharge_Location_Identification_CallBack(img_msg):
 
     cv2.waitKey(1)
 
-#callback for lap_counter_subscriber
+#subscriber callback for lap_counter
 def lap_counter_callback(msg):
     global lap_counter
     lap_counter=msg.data
 
-#callback for Current_Waypoint_Index_Lap_01_subscriber
+#subscriber callback for Current_Waypoint_Index_Lap_01_subscriber
 def Current_Waypoint_Index_Lap_01_callback(msg):
     global   Current_Waypoint_Index_Lap_01
     Current_Waypoint_Index_Lap_01=msg.data
 
+#subscriber callback for Water_Syringes_Parameters subscriber
+def Water_Syringes_Parameters_callback(msg):
+  global   Water_Released_by_Syringes
+  global   Water_Sucked_by_Syringes
+  Water_Released_by_Syringes=msg.data[0]
+  Water_Sucked_by_Syringes=msg.data[1]
 
-
+#Publisher thread for WDL_WRL_Parameters
 def WDL_WRL_Parameters_publisher_thread_func(name):
     global   Water_Discharge_Location_Detected_Lap_01 
     global   Water_Reservoir_Location_Detected_Lap_01 
@@ -427,23 +436,31 @@ def WDL_WRL_Parameters_publisher_thread_func(name):
 if __name__ == '__main__':
     
     global lap_counter
-    global Water_Reservoir_Location
-    global Water_Discharge_Location
+    global Water_Reservoir_Location_publisher
+    global Water_Discharge_Location_publisher
     global Water_Discharge_Location_Detected_Lap_01 
     global Water_Reservoir_Location_Detected_Lap_01 
+    global Water_Discharge_Location_Detected_Lap_02
+    global Water_Reservoir_Location_Detected_Lap_02 
+    global Waypoint_Index_After_which_BLUE_was_detected
+    global Waypoint_Index_After_which_RED_was_detected
     global Current_Waypoint_Index_Lap_01
     
     Water_Discharge_Location_Detected_Lap_01 =0
     Water_Reservoir_Location_Detected_Lap_01 =0 
+    Water_Discharge_Location_Detected_Lap_02 =0
+    Water_Reservoir_Location_Detected_Lap_02 =0
+    Waypoint_Index_After_which_BLUE_was_detected =0
+    Waypoint_Index_After_which_RED_was_detected =0
     #name of the node is "Water_Reservoir_Discharge_Location_Identification"
     rospy.init_node('Water_Reservoir_Discharge_Location_Identification')   
       
  
 
     #publish /Water_Reservoir_Location topic
-    Water_Reservoir_Location=rospy.Publisher('/Water_Reservoir_Location_Topic',Float32MultiArray,queue_size=10)
+    Water_Reservoir_Location_publisher=rospy.Publisher('/Water_Reservoir_Location_Topic',Float32MultiArray,queue_size=10)
     
-    Water_Discharge_Location=rospy.Publisher('/Water_Discharge_Location_Topic',Float32MultiArray,queue_size=10)
+    Water_Discharge_Location_publisher=rospy.Publisher('/Water_Discharge_Location_Topic',Float32MultiArray,queue_size=10)
     
 
 
@@ -451,8 +468,6 @@ if __name__ == '__main__':
     #This is the most important function, whenever there is an image 
     #available ImageCallBack function is called and it provides 
     # the images from the camera
-
-
     imageSub=rospy.Subscriber(dronetype+"/image_raw",Image,Water_Reservoir_Discharge_Location_Identification_CallBack)
 
    
@@ -461,11 +476,15 @@ if __name__ == '__main__':
 
     #defining subscriber for  Current_Waypoint_Index_Lap_01
     Current_Waypoint_Index_Lap_01_subscriber=rospy.Subscriber('Current_Waypoint_Index_Lap_01_topic',Int32,Current_Waypoint_Index_Lap_01_callback)
+    
+    #defining subscriber for Water_Syringes_Parameters
+    Water_Syringes_Parameters_subscriber=rospy.Subscriber('Water_Syringes_Parameters_topic',Float32MultiArray,Water_Syringes_Parameters_callback)
 
     #Publishing the WRL,WDL Parameters using a separate thread
-    GPS_publisher_thread = threading.Thread(target=WDL_WRL_Parameters_publisher_thread_func, args=(1,))
-    GPS_publisher_thread.start()
+    WDL_WRL_Parameters_publisher_thread = threading.Thread(target=WDL_WRL_Parameters_publisher_thread_func, args=(1,))
+    WDL_WRL_Parameters_publisher_thread.start()
     
+
     rospy.spin()
     
 

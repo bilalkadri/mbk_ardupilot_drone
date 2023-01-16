@@ -91,7 +91,7 @@ def GPS_Position_Callback_function(data_recieve):
         # rospy.set_param('/Water_Discharge_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
         #####################################################################################
         ########## ALERT, In this code we are not publishing this variable###################
-        ########### We have ro define a separate thread which will publish these variables###
+        ########### We have to define a separate thread which will publish these variables###
         #####################################################################################
         Water_Discharge_Location_Detected_Lap_01=0 # I think we have to publish this value as well
 
@@ -108,7 +108,7 @@ def GPS_Position_Callback_function(data_recieve):
         Water_Reservoir_Location_Saved=1
         #####################################################################################
         ########## ALERT, In this code we are not publishing this variable###################
-        ########### We have ro define a separate thread which will publish these variables###
+        ########### We have to define a separate thread which will publish these variables###
         #####################################################################################
         # rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
         Water_Reservoir_Location_Detected_Lap_01=0
@@ -116,6 +116,10 @@ def GPS_Position_Callback_function(data_recieve):
 def Water_Discharge_Detected_Callback_function(data_recieve):
     
     global lap_counter
+    global Water_Discharge_Location_Detected_Lap_02
+    global EXECUTING_WAYPOINT_NAVIGATION
+    global   Water_Released_by_Syringes
+    global   Water_Sucked_by_Syringes  
     # lap_counter=0
     #RED
     
@@ -142,8 +146,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
      
     #Reading parameters from the ROS Parameter Server       
     #lap_counter = rospy.get_param("/Lap_Count")
-    Water_Discharge_Location_Detected_Lap_02 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_02")
-    EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
+    # Water_Discharge_Location_Detected_Lap_02 = rospy.get_param("/Water_Discharge_Location_Detected_Lap_02")
+    # EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
 
   
     if (lap_counter >1 and Water_Discharge_Location_Detected_Lap_02 and not(EXECUTING_WAYPOINT_NAVIGATION)):
@@ -247,7 +251,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
             # since   /Water_Discharge_Location_Detected was set to '0' hence it was not entering
             #in this if condition again
             elif (5-Z_position)<1 and Water_Released_by_Syringes_local_variable:
-                rospy.set_param("/Water_Discharge_Location_Detected_Lap_02",0)
+                # rospy.set_param("/Water_Discharge_Location_Detected_Lap_02",0)
+                Water_Discharge_Location_Detected_Lap_02=0
                 print('I am continuing my mission on the waypoints')   
 
             # print('Cond 2,Z position = {0} Z error ={1}  Euclidean distance = {2}'.format(Z_position,Z_Error, distance_to_center))
@@ -265,6 +270,10 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 def Water_Reservoir_Detected_Callback_function(data_recieve):
     global lap_counter
     global counter_for_BLUE
+    global Water_Reservoir_Location_Detected_Lap_02
+    global EXECUTING_WAYPOINT_NAVIGATION
+    global   Water_Released_by_Syringes
+    global   Water_Sucked_by_Syringes  
     #print('Water Reservoir detected')
     #print data_recieve.data[0]
     setPointX=data_recieve.data[0]  # 320, 640/2 , half the size of x-dimension of window 
@@ -297,9 +306,9 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
      
     #Reading parameters from the ROS Parameter Server       
     # lap_counter = rospy.get_param("/Lap_Count")
-    Water_Reservoir_Location_Detected_Lap_02 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_02")
+    # Water_Reservoir_Location_Detected_Lap_02 = rospy.get_param("/Water_Reservoir_Location_Detected_Lap_02")
 
-    EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
+    # EXECUTING_WAYPOINT_NAVIGATION=rospy.get_param('/EXECUTING_WAYPOINT_NAVIGATION') #THis is used so that vehicle.simplegoto() is not interrupted during the execution
     
 
   
@@ -404,7 +413,8 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             # since   /Water_Reservoir_Location_Detected was set to '0' hence it was not enter
             #in this if condition again
             elif (5-Z_position)<1 and Water_Sucked_by_Syringes_local_variable:
-                rospy.set_param("/Water_Reservoir_Location_Detected_Lap_02",0)
+                # rospy.set_param("/Water_Reservoir_Location_Detected_Lap_02",0)
+                Water_Reservoir_Location_Detected_Lap_02=0
                 print('I am continuing my mission on the waypoints')
                 
                          
@@ -440,7 +450,20 @@ def timeout():
     pub_move.publish(twist)
 
     # Do something      
-         
+
+#subscriber callback for Water_Syringes_Parameters subscriber
+def Water_Syringes_Parameters_callback(msg):
+  global   Water_Released_by_Syringes
+  global   Water_Sucked_by_Syringes
+  Water_Released_by_Syringes=msg.data[0]
+  Water_Sucked_by_Syringes=msg.data[1]
+
+
+#subscriber callback for  EXECUTING_WAYPOINT_NAVIGATION subscriber
+def EXECUTING_WAYPOINT_NAVIGATION_callback(msg):
+    global EXECUTING_WAYPOINT_NAVIGATION
+    EXECUTING_WAYPOINT_NAVIGATION=msg.data
+
 #subscriber callback for WDL_WRL_Parameters subscriber
 def WDL_WRL_Parameters_callback(msg):
     global   Water_Discharge_Location_Detected_Lap_01 
@@ -471,10 +494,12 @@ def lap_counter_callback(msg):
     global lap_counter
     lap_counter=msg.data
 
+#Publisher thread for WDL_WRL_Location_Saved
 def WDL_WRL_Location_Saved_publisher_thread_func(name):
   global   Water_Discharge_Location_Saved
   global   Water_Reservoir_Location_Saved
 
+  logging.info("Thread %s: starting", name)
   WDL_WRL_Location_Saved_publisher=rospy.Publisher('WDL_WRL_Location_Saved_topic', Float32MultiArray,queue_size=10)
      
   rate = rospy.Rate(10)  # 10hz
@@ -487,7 +512,26 @@ def WDL_WRL_Location_Saved_publisher_thread_func(name):
   
         rate.sleep()
 
+#Publisher thread for Water_Syringes_Parameters_publisher_thread_func
 
+def Water_Syringes_Parameters_publisher_thread_func(name):
+    global   Water_Released_by_Syringes
+    global   Water_Sucked_by_Syringes 
+
+    Water_Syringes_Parameters_publisher=rospy.Publisher('Water_Syringes_Parameters_topic', Float32MultiArray,queue_size=10)
+     
+    rate = rospy.Rate(10)  # 10hz
+    # lap_count_publisher.publish(lap_counter)
+    while not rospy.is_shutdown():
+        array =[Water_Released_by_Syringes, Water_Sucked_by_Syringes]
+        dataToSend=Float32MultiArray(data=array)
+        Water_Syringes_Parameters_publisher.publish(dataToSend)
+
+      
+        rate.sleep()
+
+
+#Publisher thread for GPS Locations
 def GPS_publisher_thread_func(name):
 
     #Defining two publishers in this thread which will keep on updating the GPS coordinates
@@ -499,7 +543,7 @@ def GPS_publisher_thread_func(name):
     global   Water_Reservoir_Location_Latitude
     global   Water_Reservoir_Location_Longitude
     global   Water_Reservoir_Location_Altitude
-
+ 
     
     logging.info("Thread %s: starting", name)
 
@@ -518,6 +562,39 @@ def GPS_publisher_thread_func(name):
         Water_Reservoir_Location_GPS_publisher.publish(WRL_dataToSend)
         rate.sleep()
 
+
+#Publisher thread for WDL_WRL_Parameters
+# We just have to update  Water_Reservoir_Location_Detected_Lap_01=0
+#  and  Water_Reservoir_Location_Detected_Lap_01=0
+# but we have to publish all the parameters using a separate thread
+# as  both these variables along with other variables are published in
+# topic 'WDL_WRL_Parameters_topic'
+def WDL_WRL_Parameters_publisher_thread_func(name):
+    global   Water_Discharge_Location_Detected_Lap_01 
+    global   Water_Reservoir_Location_Detected_Lap_01 
+    global   Water_Discharge_Location_Detected_Lap_02
+    global   Water_Reservoir_Location_Detected_Lap_02 
+    global   Waypoint_Index_After_which_BLUE_was_detected
+    global   Waypoint_Index_After_which_RED_was_detected
+
+    logging.info("Thread %s: starting", name)
+    WDL_WRL_Parameters_publisher=rospy.Publisher('WDL_WRL_Parameters_topic', Float32MultiArray,queue_size=10)
+  
+
+    rate = rospy.Rate(10)  # 10hz
+    # lap_count_publisher.publish(lap_counter)
+    while not rospy.is_shutdown():
+        WDL_WRL_Parameters =[Water_Discharge_Location_Detected_Lap_01 ,
+                             Water_Reservoir_Location_Detected_Lap_01,
+                             Water_Discharge_Location_Detected_Lap_02,
+                             Water_Reservoir_Location_Detected_Lap_02,
+                             Waypoint_Index_After_which_BLUE_was_detected,
+                             Waypoint_Index_After_which_RED_was_detected ]
+        WDL_WRL_Parameters_dataToSend=Float32MultiArray(data=WDL_WRL_Parameters)
+        WDL_WRL_Parameters_publisher.publish(WDL_WRL_Parameters_dataToSend)
+        rate.sleep()
+
+
 if __name__ == '__main__':
     
     global   Water_Discharge_Location_Latitude
@@ -528,6 +605,8 @@ if __name__ == '__main__':
     global   Water_Reservoir_Location_Altitude
     global   Water_Discharge_Location_Saved
     global   Water_Reservoir_Location_Saved
+    global   Water_Released_by_Syringes
+    global   Water_Sucked_by_Syringes 
 
     Water_Discharge_Location_Latitude=0
     Water_Discharge_Location_Longitude=0
@@ -537,6 +616,8 @@ if __name__ == '__main__':
     Water_Reservoir_Location_Altitude=0
     Water_Discharge_Location_Saved=0
     Water_Reservoir_Location_Saved=0
+    Water_Released_by_Syringes=0
+    Water_Sucked_by_Syringes =0
     #global water_detected
         
     rospy.init_node('Water_Tracking_PID_Controller')
@@ -554,9 +635,18 @@ if __name__ == '__main__':
     GPS_publisher_thread = threading.Thread(target=GPS_publisher_thread_func, args=(1,))
     GPS_publisher_thread.start()
 
-    #Publishing WDL_WRL_Location_Saved using a separate thread
-    WDL_WRL_Location_Saved_thread=threading.Thread(target=WDL_WRL_Location_Saved_publisher_thread_func,args(2,))
+    #Publishing WDL_WRL_Location_Saved parameters using a separate thread
+    WDL_WRL_Location_Saved_thread=threading.Thread(target=WDL_WRL_Location_Saved_publisher_thread_func,args=(1,))
     WDL_WRL_Location_Saved_thread.start()
+
+    #Publishing the WRL,WDL Parameters using a separate thread
+    WDL_WRL_Parameters_publisher_thread = threading.Thread(target=WDL_WRL_Parameters_publisher_thread_func, args=(1,))
+    WDL_WRL_Parameters_publisher_thread.start()
+    
+
+    #PUblishing the Water_Syringes_Parameters_topic using a separate thread
+    Water_Syringes_Parameters_publisher_thread=threading.Thread(target=Water_Syringes_Parameters_publisher_thread_func,args=(1,))
+    Water_Syringes_Parameters_publisher_thread.start()
 
     #We will takeoff and land using Anis Kouba's Code for generating comand to MavProxy (dronemap_control_using_MAVROS)
     #pub_TakeOff = rospy.Publisher(dronetype+"/takeoff", Empty, queue_size=10)
@@ -575,6 +665,13 @@ if __name__ == '__main__':
     #defining subscriber for WRL, WDL Parameters
     WRL_WDL_Parameters_subscriber=rospy.Subscriber('WDL_WRL_Parameters_topic',Float32MultiArray,WDL_WRL_Parameters_callback)
 
+    #defining subscriber for EXECUTING_WAYPOINT_NAVIGATION_topic
+    EXECUTING_WAYPOINT_NAVIGATION_subscriber=rospy.Subscriber('EXECUTING_WAYPOINT_NAVIGATION_topic',Int32,EXECUTING_WAYPOINT_NAVIGATION_callback)
+    
+    #defining subscriber for Water_Syringes_Parameters
+    Water_Syringes_Parameters_subscriber=rospy.Subscriber('Water_Syringes_Parameters_topic',Float32MultiArray,Water_Syringes_Parameters_callback)
+
+    
     rospy.spin()
 
 

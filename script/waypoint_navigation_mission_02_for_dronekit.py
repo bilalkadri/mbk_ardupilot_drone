@@ -37,7 +37,9 @@ def dist_between_global_coordinates(aLocation1, aLocation2):
 def set_destination(lat, lon, alt, wp_index):
 
     global vehicle
-    rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',1)
+    global EXECUTING_WAYPOINT_NAVIGATION
+    # rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',1)
+    EXECUTING_WAYPOINT_NAVIGATION=1
     print("Moving to Waypoint {0}".format(wp_index))
     
     aLocation = LocationGlobalRelative(lat, lon, float(alt))
@@ -51,7 +53,8 @@ def set_destination(lat, lon, alt, wp_index):
         dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     print("Distance to Waypoint {0}: {1}".format(wp_index, dist_to_wp))
     print("Reached Waypoint {0}".format(wp_index))
-    rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',0)
+    # rospy.set_param('/EXECUTING_WAYPOINT_NAVIGATION',0)
+    EXECUTING_WAYPOINT_NAVIGATION=0
 
     time.sleep(1)
 
@@ -77,10 +80,6 @@ def check_waypoint_reached(lat, lon, alt, wp_index):
     # print('Value of the flag :',flag)
     
     return flag
-
-    # time.sleep(1)
-
-
 
 
 def arm_and_takeoff(aTargetAltitude):
@@ -117,23 +116,32 @@ def arm_and_takeoff(aTargetAltitude):
         time.sleep(1)
 
 
+
+    
+
+
+#Publisher thread for lap_counter, Current_Waypoint_Index_Lap_01 and EXECUTING_WAYPOINT_NAVIGATION
 def lap_counter_publisher_thread_func(name):
     global   lap_counter
     global   Current_Waypoint_Index_Lap_01
+    global   EXECUTING_WAYPOINT_NAVIGATION
     logging.info("Thread %s: starting", name)
     # pub = rospy.Publisher('chatter', String, queue_size=10)
       #defining publisher and subscriber for lap counter
     # lap_count_publisher=rospy.Publisher('lap_counter_topic', int)
     lap_count_publisher=rospy.Publisher('lap_counter_topic', Int32,queue_size=10)
     Current_Waypoint_Index_Lap_01_publisher=rospy.Publisher('Current_Waypoint_Index_Lap_01_topic', Int32,queue_size=10)
-   
+    EXECUTING_WAYPOINT_NAVIGATION_publisher=rospy.Publisher('EXECUTING_WAYPOINT_NAVIGATION_topic', Int32,queue_size=10)
+
     rate = rospy.Rate(10)  # 10hz
     # lap_count_publisher.publish(lap_counter)
     while not rospy.is_shutdown():
         lap_count_publisher.publish(lap_counter)
         Current_Waypoint_Index_Lap_01_publisher.publish(Current_Waypoint_Index_Lap_01)
+        EXECUTING_WAYPOINT_NAVIGATION_publisher.publish(EXECUTING_WAYPOINT_NAVIGATION)
         rate.sleep()
 
+# Subscriber Callback function for Water_Discharge_Location_GPS
 def Water_Discharge_Location_GPS_Callback_function(data_recieve):
     global   Water_Discharge_Location_Latitude
     global   Water_Discharge_Location_Longitude
@@ -144,7 +152,7 @@ def Water_Discharge_Location_GPS_Callback_function(data_recieve):
     Water_Discharge_Location_Altitude=data_recieve.data[2]
 
 
-
+# Subscriber Callback funtion for Water_Reservoir_Location_GPS
 def Water_Reservoir_Location_GPS_Callback_function(data_recieve):
     global   Water_Reservoir_Location_Latitude
     global   Water_Reservoir_Location_Longitude
@@ -155,7 +163,7 @@ def Water_Reservoir_Location_GPS_Callback_function(data_recieve):
     Water_Reservoir_Location_Altitude=data_recieve.data[2]
 
 
-#subscriber callback for WDL_WRL_Parameters subscriber
+#Subscriber callback function for WDL_WRL_Parameters subscriber
 def WDL_WRL_Parameters_callback(msg):
     global   Water_Discharge_Location_Detected_Lap_01 
     global   Water_Reservoir_Location_Detected_Lap_01 
@@ -171,6 +179,10 @@ def WDL_WRL_Parameters_callback(msg):
     Water_Reservoir_Location_Detected_Lap_02    =msg.data[3]
     Waypoint_Index_After_which_BLUE_was_detected=msg.data[4]
     Waypoint_Index_After_which_RED_was_detected =msg.data[5]
+
+
+# Why can't we have the same subscriber for WDL_WRL_Parameters and WDL_WRL_Location_Saved?
+# I must write the reason here 
 
 #subscriber callback for WDL_WRL_Location_Saved subscriber
 def WDL_WRL_Location_Saved_Callback_function(msg):
@@ -201,11 +213,17 @@ def main():
     global   Waypoint_Index_After_which_RED_was_detected 
     global   Water_Discharge_Location_Saved
     global   Water_Reservoir_Location_Saved
-    
+    global   EXECUTING_WAYPOINT_NAVIGATION
           
     lap_counter=0
     Current_Waypoint_Index_Lap_01=0
+    Water_Discharge_Location_Saved=0
+    Water_Reservoir_Location_Saved=0
+    Water_Discharge_Location_Detected_Lap_02=0
+    Water_Reservoir_Location_Detected_Lap_02 =0
+    EXECUTING_WAYPOINT_NAVIGATION =0
     
+
     rospy.init_node("Waypoint_Navigation", anonymous=True)
 
     #This thread will publish the 'lap_counter' values
@@ -223,7 +241,7 @@ def main():
 
 
     # Connect to the Vehicle
-    # connection_string = '/dev/ttyUSB0'
+    # connection_string = '/dev/ttyUSB0'  #for connecting with the actual hardware
     connection_string = 'udp:127.0.0.1:14550'
     print('Connecting to vehicle on: %s' % connection_string)
     vehicle = connect(connection_string, wait_ready=True, baud=921600)
@@ -346,7 +364,7 @@ def main():
                 Latitude=Water_Reservoir_Location_Latitude
                 Longitude=Water_Reservoir_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Reservoir_Location_Altitude')
-                index=Waypoint_Index_After_which_BLUE_was_detected
+                index=int(Waypoint_Index_After_which_BLUE_was_detected)
                 waypoints_lap_02.insert(index,[Latitude,Longitude,Altitude,index])
                 print('I am inserting the BLUE''s GPS location in the waypoints_lap_02 at index:',index)
                 ENTRY_FLAG_01=0
@@ -358,7 +376,7 @@ def main():
                 Latitude=Water_Discharge_Location_Latitude
                 Longitude=Water_Discharge_Location_Longitude
                 Altitude=5 #rospy.get_param('/Water_Discharge_Location_Altitude')
-                index=Waypoint_Index_After_which_RED_was_detected
+                index=int(Waypoint_Index_After_which_RED_was_detected)
                 waypoints_lap_02.insert(index+1,[Latitude,Longitude,Altitude,index+1]) #If we use index the RED location will be inserted before waypoint 3 which will be incorrect
                 print('I am inserting the RED''s GPS location in the waypoints_lap_02 at index',index)
                 ENTRY_FLAG_02=0
@@ -395,8 +413,7 @@ def main():
             way_point_index=waypoints_lap_02[i][3]
             set_destination(x,y,z,way_point_index)
             time.sleep(2)    
-            # rate.sleep()
-            # while TRUE:
+          
             if check_waypoint_reached(x, y, z, way_point_index):
                 i += 1
                     # break

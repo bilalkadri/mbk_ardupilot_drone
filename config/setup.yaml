@@ -4,17 +4,17 @@
 # Water_Discharge_Location_Detected_Lap_02: 0
 # Water_Reservoir_Location_Detected_Lap_01: 0
 # Water_Discharge_Location_Detected_Lap_01: 0
-Water_Sucked_by_Syringes : 0
-Water_Released_by_Syringes : 0
+# Water_Sucked_by_Syringes : 0
+# Water_Released_by_Syringes : 0
 # Water_Reservoir_Location_Latitude : 0.0
 # Water_Reservoir_Location_Longitude : 0.0
 # Water_Reservoir_Location_Altitude : 0.0
 # Water_Discharge_Location_Latitude : 0.0
 # Water_Discharge_Location_Longitude : 0.0
 # Water_Discharge_Location_Altitude : 0.0
-Water_Discharge_Location_Saved : 0
-Water_Reservoir_Location_Saved : 0
-EXECUTING_WAYPOINT_NAVIGATION : 0
+# Water_Discharge_Location_Saved : 0
+# Water_Reservoir_Location_Saved : 0
+# EXECUTING_WAYPOINT_NAVIGATION : 0
 # Current_Waypoint_Index_Lap_01 : 0
 # Waypoint_Index_After_which_BLUE_was_detected: 0
 # Waypoint_Index_After_which_RED_was_detected: 0
