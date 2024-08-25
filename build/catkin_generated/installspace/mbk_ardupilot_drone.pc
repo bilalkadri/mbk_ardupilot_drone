@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: mbk_ardupilot_drone
+Description: Description of mbk_ardupilot_drone
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

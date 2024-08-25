@@ -29,12 +29,17 @@ import matplotlib.pyplot as plt
 # Kd (Derivative Gain)
 # limit (controller saturation limit)
 
+Kp=0.01
+Ki=0.01
+Kd=2
+limit=1
+
 THRESHOLD_FOR_DISTANCE_TO_CENTER=150
 HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK= 3.5
 
-controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
-controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
-controller_y = pid_controller(0.01, .01, 2, 1) # global y, for copter looking at the shelf it is z
+controller_z = pid_controller(Kp, Ki, Kd, limit) # global z, for copter looking at the shelf it is -x
+controller_x = pid_controller(Kp, Ki, Kd, limit) # global x, for copter looking at the shelf it is y (or -y) 
+controller_y = pid_controller(Kp, Ki, Kd, limit) # global y, for copter looking at the shelf it is z
 #controller_yaw = pd_controller(0.1, 0.5, 1.0) # global y, for copter looking at the shelf it is z
 
 
@@ -86,7 +91,7 @@ def GPS_Position_Callback_function(data_recieve):
     if (lap_counter ==1 and Water_Reservoir_Location_Detected_Lap_01):
         rospy.set_param('/Water_Reservoir_Location_Latitude', latitude)
         rospy.set_param('/Water_Reservoir_Location_Longitude' ,longitude)
-        rospy.set_param('/Water_Reservoir_Location_Altitude ',altitude)
+        rospy.set_param('/Water_Reservoir_Location_Altitude',altitude)
         rospy.set_param('/Water_Reservoir_Location_Saved',1)
         rospy.set_param('/Water_Reservoir_Location_Detected_Lap_01',0) #so that it does not enter into this if condition again
         
@@ -179,6 +184,15 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
 
         if distance_to_center > THRESHOLD_FOR_DISTANCE_TO_CENTER:
+            # controller_x.set_Kp(rospy.get_param(Kp))
+            # controller_x.set_Ki(rospy.get_param(Ki))
+            # controller_x.set_Kd(rospy.get_param(Kd))
+            # controller_y.set_Kp(rospy.get_param(Kp))
+            # controller_y.set_Kp(rospy.get_param(Ki))
+            # controller_y.set_Kp(rospy.get_param(Kd))
+
+
+
             twist.twist.linear.x=0.1*controller_x.set_current_error(X_Error)
             twist.twist.linear.y=0.1*controller_y.set_current_error(-Y_Error)
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
@@ -390,9 +404,6 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             twist.twist.angular.y=0
             twist.twist.angular.z=0 #controller_yaw.set_current_error(0)
         
-        # plt.rcParams["figure.figsize"] = [7.50, 3.50]
-        # plt.rcParams["figure.autolayout"] = True
-
         
         # plt.title("Line graph")
         # plt.plot(index_BLUE_Vector, currentX_BLUE_Vector, color="red")

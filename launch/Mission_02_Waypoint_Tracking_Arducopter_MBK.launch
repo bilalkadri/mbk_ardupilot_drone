@@ -35,7 +35,22 @@
 
 <!--MFFAC Controller for Picking and Dropping Water-->
 <!-- <node pkg="mbk_ardupilot_drone" type="WaterTracking_fuzzyControl_ARDUPILOT_MBK.py" 
-  
-    name="MBK_Set_Flight_Modes_and_Tracking_MFFAC_Controller" output="screen" >
+      name="MBK_Set_Flight_Modes_and_Tracking_MFFAC_Controller" output="screen" >
 </node> -->
+
+
+<!--Gain Scheduled PID Controller-->
+<!--I have to run both the files to enable the gain sheeduled PI-->
+<!--GS PID Controller for Picking and Dropping Water-->
+ <!-- <node pkg="mbk_ardupilot_drone" type="WaterTracking_gs_pidControl_ARDUPILOT_MBK.py" 
+    name="MBK_Set_Flight_Modes_and_Tracking_GS_PID_Controller" output="screen" >
+</node> -->
+
+
+<!--This is the actual code where all optimization is being performed-->
+<!-- <node pkg="mbk_ardupilot_drone" type="gain_scheduled_pid_controller_UAV_mbk.py"
+name="MBK_Gain_Scheduled_PID_Controller" output="screen" > 
+</node>  -->
+
+
 </launch>

@@ -1,6 +1,4 @@
 import time
-
-
 class pid_controller:
 
 #This was originally a PD controller, MBK added the Integral term, hence converitng it into a PID
@@ -29,6 +27,20 @@ class pid_controller:
         # Windup Guard
         self.int_error = 0.0
         self.windup_guard = 20.0
+
+    def set_Kp(self,Kp):
+        self._p_coef=Kp
+
+    def set_Kd(self,Kd):
+        self._d_coef=Kd
+
+    def set_Ki(self,Ki):
+        self._i_coef=Ki
+
+    def set_limit_out(self,limit_out):
+        self._limit_out=limit_out
+    
+
 
     def set_current_error(self, error):
 

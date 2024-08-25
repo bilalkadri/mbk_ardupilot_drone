@@ -18,3 +18,15 @@ EXECUTING_WAYPOINT_NAVIGATION : 0
 Current_Waypoint_Index_Lap_01 : 0
 Waypoint_Index_After_which_BLUE_was_detected: 0
 Waypoint_Index_After_which_RED_was_detected: 0
+Kp_x : 0.01   #Kp for x
+Ki_x : 0.01   #Ki for x 
+Kd_x : 2      #Kd for x
+limit_x : 1   #limit for x
+Kp_y : 0.01   #Kp for y
+Ki_y : 0.01   #Ki for y 
+Kd_y : 2      #Kd for y
+limit_y : 1   #limit for y
+
+# /gains/P = 10.0
+# /gains/I = 1.0
+# /gains/D = 0.1
