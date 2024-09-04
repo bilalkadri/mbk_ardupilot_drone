@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/devel/setup.sh
