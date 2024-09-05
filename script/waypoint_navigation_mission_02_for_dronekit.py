@@ -129,7 +129,7 @@ def main():
     # connection_string = '/dev/ttyUSB0'
     connection_string = 'udp:127.0.0.1:14550'
     print('Connecting to vehicle on: %s' % connection_string)
-    vehicle = connect(connection_string, wait_ready=True, baud=921600)
+    vehicle = connect(connection_string, baud=921600)
     print("Connection Successfully Established!")    
 
     # wp1 = LocationGlobalRelative(24.7944609, 67.1353376, 5)
