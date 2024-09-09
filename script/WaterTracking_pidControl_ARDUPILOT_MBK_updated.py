@@ -21,6 +21,7 @@ import math
 import threading
 from pid_controller_mbk import pid_controller
 import matplotlib.pyplot as plt
+import pickle
 
 #-------------------------------------------------------
 #EXPLANATION OF THE pid_controller (Kp,Ki,Kd,limit) parameters
@@ -56,6 +57,29 @@ current_pose = PoseStamped()
 # Y_Error_BLUE_Vector=[]
 # counter_for_BLUE=0
 # index_BLUE_Vector=[]
+
+blue_water_reservoir_pid_x_errors = []
+blue_water_reservoir_pid_y_errors = []
+blue_water_reservoir_pid_z_errors = []
+blue_water_reservoir_sp_x = []
+blue_water_reservoir_sp_y = []
+blue_water_reservoir_sp_z = []
+
+red_water_discharge_pid_x_errors = []
+red_water_discharge_pid_y_errors = []
+red_water_discharge_pid_z_errors = []
+red_water_discharge_sp_x = []
+red_water_discharge_sp_y = []
+red_water_discharge_sp_z = []
+
+log_data = {'blue_x_errors':[], 'blue_y_errors':[], 'blue_z_errors':[],
+            'red_x_errors':[], 'red_y_errors':[], 'red_z_errors':[]}
+
+def write_to_log(data):
+
+    f = open('/home/ugv/rtab_ws/src/mbk_ardupilot_drone/script/data.pickle', 'wb')
+    pickle.dump(data, f)
+    f.close()
 
 def pos_sub_callback(pose_sub_data):
     global current_pose
@@ -109,6 +133,10 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
     Y_Error= setPointY-currentY       #(x,y) is the top left corner
    
     Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter above the tank
+
+    red_water_discharge_pid_x_errors.append(X_Error)
+    red_water_discharge_pid_y_errors.append(Y_Error)
+    red_water_discharge_pid_z_errors.append(Z_Error)
 
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
@@ -233,6 +261,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
         
         
         pub_move.publish(twist)
+        log_data.update({'red_x_errors':red_water_discharge_pid_x_errors, 'red_y_errors':red_water_discharge_pid_y_errors, 'red_z_errors':red_water_discharge_pid_z_errors})
+        write_to_log(log_data)
 
 
 
@@ -255,6 +285,11 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
     Y_Error= setPointY-currentY       #(x,y) is the top left corner
    
     Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter 
+
+    blue_water_reservoir_pid_x_errors.append(X_Error)
+    blue_water_reservoir_pid_y_errors.append(Y_Error)
+    blue_water_reservoir_pid_z_errors.append(Z_Error)
+
 
     # BLUE_Data=[setPointX,currentX,X_Error,setPointY,currentY,Y_Error,Z_Error]
 
@@ -399,6 +434,8 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
         # plt.show()
 
         pub_move.publish(twist)
+        log_data.update({'blue_x_errors':blue_water_reservoir_pid_x_errors, 'blue_y_errors':blue_water_reservoir_pid_y_errors, 'blue_z_errors':blue_water_reservoir_pid_z_errors})
+        write_to_log(log_data)
 
 
 def timeout():

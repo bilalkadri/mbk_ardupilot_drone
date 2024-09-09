@@ -131,7 +131,7 @@ def main():
     print('Connecting to vehicle on: %s' % connection_string)
     vehicle = connect(connection_string, baud=921600)
     print("Connection Successfully Established!")    
-
+    # print("Set groundspeed to 2m/s (max).")
     # wp1 = LocationGlobalRelative(24.7944609, 67.1353376, 5)
     print("Starting Takeoff")
     arm_and_takeoff(takeoff_alt)
