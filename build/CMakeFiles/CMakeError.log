@@ -230,3 +230,293 @@ make: *** [Makefile:121: cmTC_2e2bc/fast] Error 2
 
 
 
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_07dff/fast && /usr/bin/make -f CMakeFiles/cmTC_07dff.dir/build.make CMakeFiles/cmTC_07dff.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_07dff.dir/src.c.o
+/usr/lib/ccache/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_07dff.dir/src.c.o   -c /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_07dff
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_07dff.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_07dff.dir/src.c.o  -o cmTC_07dff 
+/usr/bin/ld: CMakeFiles/cmTC_07dff.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_07dff.dir/build.make:87: cmTC_07dff] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_07dff/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3be6a/fast && /usr/bin/make -f CMakeFiles/cmTC_3be6a.dir/build.make CMakeFiles/cmTC_3be6a.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3be6a.dir/CheckFunctionExists.c.o
+/usr/lib/ccache/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_3be6a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_3be6a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3be6a.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_3be6a.dir/CheckFunctionExists.c.o  -o cmTC_3be6a  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_3be6a.dir/build.make:87: cmTC_3be6a] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_3be6a/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_98f29/fast && /usr/bin/make -f CMakeFiles/cmTC_98f29.dir/build.make CMakeFiles/cmTC_98f29.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_98f29.dir/src.c.o
+/usr/lib/ccache/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_98f29.dir/src.c.o   -c /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_98f29
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_98f29.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_98f29.dir/src.c.o  -o cmTC_98f29 
+/usr/bin/ld: CMakeFiles/cmTC_98f29.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_98f29.dir/build.make:87: cmTC_98f29] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_98f29/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e09e5/fast && /usr/bin/make -f CMakeFiles/cmTC_e09e5.dir/build.make CMakeFiles/cmTC_e09e5.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e09e5.dir/CheckFunctionExists.c.o
+/usr/lib/ccache/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_e09e5.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_e09e5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e09e5.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_e09e5.dir/CheckFunctionExists.c.o  -o cmTC_e09e5  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e09e5.dir/build.make:87: cmTC_e09e5] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_e09e5/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c855a/fast && /usr/bin/make -f CMakeFiles/cmTC_c855a.dir/build.make CMakeFiles/cmTC_c855a.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c855a.dir/src.c.o
+/usr/lib/ccache/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_c855a.dir/src.c.o   -c /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_c855a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c855a.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_c855a.dir/src.c.o  -o cmTC_c855a 
+/usr/bin/ld: CMakeFiles/cmTC_c855a.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_c855a.dir/build.make:87: cmTC_c855a] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_c855a/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_85b8a/fast && /usr/bin/make -f CMakeFiles/cmTC_85b8a.dir/build.make CMakeFiles/cmTC_85b8a.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_85b8a.dir/CheckFunctionExists.c.o
+/usr/lib/ccache/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_85b8a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_85b8a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_85b8a.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_85b8a.dir/CheckFunctionExists.c.o  -o cmTC_85b8a  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_85b8a.dir/build.make:87: cmTC_85b8a] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_85b8a/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_5635a/fast && /usr/bin/make -f CMakeFiles/cmTC_5635a.dir/build.make CMakeFiles/cmTC_5635a.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5635a.dir/src.c.o
+/usr/lib/ccache/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_5635a.dir/src.c.o   -c /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_5635a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5635a.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_5635a.dir/src.c.o  -o cmTC_5635a 
+/usr/bin/ld: CMakeFiles/cmTC_5635a.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_5635a.dir/build.make:87: cmTC_5635a] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_5635a/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_36877/fast && /usr/bin/make -f CMakeFiles/cmTC_36877.dir/build.make CMakeFiles/cmTC_36877.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_36877.dir/CheckFunctionExists.c.o
+/usr/lib/ccache/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_36877.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_36877
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36877.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_36877.dir/CheckFunctionExists.c.o  -o cmTC_36877  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_36877.dir/build.make:87: cmTC_36877] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_36877/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_8e60c/fast && /usr/bin/make -f CMakeFiles/cmTC_8e60c.dir/build.make CMakeFiles/cmTC_8e60c.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8e60c.dir/src.c.o
+/usr/lib/ccache/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_8e60c.dir/src.c.o   -c /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_8e60c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8e60c.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_8e60c.dir/src.c.o  -o cmTC_8e60c 
+/usr/bin/ld: CMakeFiles/cmTC_8e60c.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_8e60c.dir/build.make:87: cmTC_8e60c] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_8e60c/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e164e/fast && /usr/bin/make -f CMakeFiles/cmTC_e164e.dir/build.make CMakeFiles/cmTC_e164e.dir/build
+make[1]: Entering directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e164e.dir/CheckFunctionExists.c.o
+/usr/lib/ccache/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_e164e.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_e164e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e164e.dir/link.txt --verbose=1
+/usr/lib/ccache/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_e164e.dir/CheckFunctionExists.c.o  -o cmTC_e164e  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e164e.dir/build.make:87: cmTC_e164e] Error 1
+make[1]: Leaving directory '/home/bilal/catkin_ws/src/mbk_ardupilot_drone/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_e164e/fast] Error 2
+
+
+

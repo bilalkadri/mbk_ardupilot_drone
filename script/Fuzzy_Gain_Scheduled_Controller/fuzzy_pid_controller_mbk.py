@@ -20,7 +20,7 @@ class fuzzy_pid_controller:
         self._limit_out = limit_out
 
         self._previous_error = 0.0
-        self._output_Ki = 0.0
+        self._integral_of_the_error = 0.0
         self._is_error_initialized = False
 
 
@@ -72,104 +72,80 @@ class fuzzy_pid_controller:
          
                        
             #Adding the contribution due to 'I' controller
-            self._output_Ki +=  error*dt
+            self._integral_of_the_error +=  error*dt
             
 
-            if (self._output_Ki < -self.windup_guard):
-                self._output_Ki = -self.windup_guard
-            elif (self._output_Ki > self.windup_guard):
-                self._output_Ki = self.windup_guard
+            if (self._integral_of_the_error < -self.windup_guard):
+                self._integral_of_the_error = -self.windup_guard
+            elif (self._integral_of_the_error > self.windup_guard):
+                self._integral_of_the_error = self.windup_guard
 
-            # Define the universe of discourse for inputs and output
-            x_range = np.linspace(0, 1, 100)
-            u_range = np.linspace(0, 1, 100)
+            error_integration=self._integral_of_the_error
+            # Define the universe of discourse for error (e), derivative of error (de), and integral of error (ie)
+            universe = np.linspace(-1, 1, 100)
 
-            # Define fuzzy variables
-            e_x = ctrl.Antecedent(x_range, 'e_x')
-            de_x = ctrl.Antecedent(x_range, 'de_x')
-            u_x = ctrl.Consequent(u_range, 'u_x')
+            # Define the membership labels
+            membership_labels = ['NL', 'NS', 'ZERO', 'PS', 'PL']
 
-            # Define membership functions for e_x and de_x
-            e_x['NL'] = fuzz.trimf(e_x.universe, [0, 0, 0.25])
-            e_x['NS'] = fuzz.trimf(e_x.universe, [0, 0.25, 0.5])
-            e_x['ZE'] = fuzz.trimf(e_x.universe, [0.25, 0.5, 0.75])
-            e_x['PS'] = fuzz.trimf(e_x.universe, [0.5, 0.75, 1])
-            e_x['PL'] = fuzz.trimf(e_x.universe, [0.75, 1, 1])
+            # Function to create membership functions for an antecedent or consequent
+            def create_membership_functions(variable, universe):
+                variable['NL'] = fuzz.trimf(universe, [-1, -1, -0.5])
+                variable['NS'] = fuzz.trimf(universe, [-1, -0.5, 0])
+                variable['ZERO'] = fuzz.trimf(universe, [-0.5, 0, 0.5])
+                variable['PS'] = fuzz.trimf(universe, [0, 0.5, 1])
+                variable['PL'] = fuzz.trimf(universe, [0.5, 1, 1])
 
-            de_x['NL'] = fuzz.trimf(de_x.universe, [0, 0, 0.25])
-            de_x['NS'] = fuzz.trimf(de_x.universe, [0, 0.25, 0.5])
-            de_x['ZE'] = fuzz.trimf(de_x.universe, [0.25, 0.5, 0.75])
-            de_x['PS'] = fuzz.trimf(de_x.universe, [0.5, 0.75, 1])
-            de_x['PL'] = fuzz.trimf(de_x.universe, [0.75, 1, 1])
+            # Function to generate all fuzzy rules
+            def generate_fuzzy_rules(error, d_error, i_error, output):
+                rules = []
+                for e in membership_labels:
+                    for de in membership_labels:
+                        for ie in membership_labels:
+                            # Define a rule: if error is 'e', d_error is 'de', and i_error is 'ie'
+                            # This example uses a simple approach where output is 'e' (you can modify this logic)
+                            rule = ctrl.Rule(error[e] & d_error[de] & i_error[ie], output[e])
+                            rules.append(rule)
+                return rules
 
-            # Define membership functions for u_x (output)
-            u_x['PVS'] = fuzz.trimf(u_x.universe, [0, 0, 0.16])
-            u_x['PS'] = fuzz.trimf(u_x.universe, [0, 0.16, 0.33])
-            u_x['PMS'] = fuzz.trimf(u_x.universe, [0.16, 0.33, 0.5])
-            u_x['PM'] = fuzz.trimf(u_x.universe, [0.33, 0.5, 0.66])
-            u_x['PML'] = fuzz.trimf(u_x.universe, [0.5, 0.66, 0.83])
-            u_x['PL'] = fuzz.trimf(u_x.universe, [0.66, 0.83, 1])
-            u_x['PVL'] = fuzz.trimf(u_x.universe, [0.83, 1, 1])
+            # Create fuzzy variables for error, derivative of error, integral of error, and output
+            error = ctrl.Antecedent(universe, 'error')
+            d_error = ctrl.Antecedent(universe, 'd_error')
+            i_error = ctrl.Antecedent(universe, 'i_error')
+            output = ctrl.Consequent(universe, 'output')
 
-            # Define fuzzy rules based on the provided table
-            rule1 = ctrl.Rule(e_x['NL'] & de_x['NL'], u_x['PVL'])
-            rule2 = ctrl.Rule(e_x['NL'] & de_x['NS'], u_x['PVL'])
-            rule3 = ctrl.Rule(e_x['NL'] & de_x['ZE'], u_x['PVL'])
-            rule4 = ctrl.Rule(e_x['NL'] & de_x['PS'], u_x['PVL'])
-            rule5 = ctrl.Rule(e_x['NL'] & de_x['PL'], u_x['PVL'])
+            # Create membership functions for each fuzzy variable
+            create_membership_functions(error, universe)
+            create_membership_functions(d_error, universe)
+            create_membership_functions(i_error, universe)
+            create_membership_functions(output, universe)
 
-            rule6 = ctrl.Rule(e_x['NS'] & de_x['NL'], u_x['PML'])
-            rule7 = ctrl.Rule(e_x['NS'] & de_x['NS'], u_x['PML'])
-            rule8 = ctrl.Rule(e_x['NS'] & de_x['ZE'], u_x['PML'])
-            rule9 = ctrl.Rule(e_x['NS'] & de_x['PS'], u_x['PML'])
-            rule10 = ctrl.Rule(e_x['NS'] & de_x['PL'], u_x['PL'])
+            # Generate the fuzzy rules
+            fuzzy_rules = generate_fuzzy_rules(error, d_error, i_error, output)
 
-            rule11 = ctrl.Rule(e_x['ZE'] & de_x['NL'], u_x['PVS'])
-            rule12 = ctrl.Rule(e_x['ZE'] & de_x['NS'], u_x['PVS'])
-            rule13 = ctrl.Rule(e_x['ZE'] & de_x['ZE'], u_x['PS'])
-            rule14 = ctrl.Rule(e_x['ZE'] & de_x['PS'], u_x['PMS'])
-            rule15 = ctrl.Rule(e_x['ZE'] & de_x['PL'], u_x['PMS'])
+            # Build the control system with all 125 rules
+            control_system = ctrl.ControlSystem(fuzzy_rules)
+            fuzzy_pid = ctrl.ControlSystemSimulation(control_system)
 
-            rule16 = ctrl.Rule(e_x['PS'] & de_x['NL'], u_x['PML'])
-            rule17 = ctrl.Rule(e_x['PS'] & de_x['NS'], u_x['PML'])
-            rule18 = ctrl.Rule(e_x['PS'] & de_x['ZE'], u_x['PML'])
-            rule19 = ctrl.Rule(e_x['PS'] & de_x['PS'], u_x['PL'])
-            rule20 = ctrl.Rule(e_x['PS'] & de_x['PL'], u_x['PVL'])
+            # Example simulation with some input values for error, derivative of error, and integral of error
+            fuzzy_pid.input['error'] = error
+            fuzzy_pid.input['d_error'] = error_diff
+            fuzzy_pid.input['i_error'] = error_integration
 
-            rule21 = ctrl.Rule(e_x['PL'] & de_x['NL'], u_x['PVL'])
-            rule22 = ctrl.Rule(e_x['PL'] & de_x['NS'], u_x['PVL'])
-            rule23 = ctrl.Rule(e_x['PL'] & de_x['ZE'], u_x['PMS'])
-            rule24 = ctrl.Rule(e_x['PL'] & de_x['PS'], u_x['PL'])
-            rule25 = ctrl.Rule(e_x['PL'] & de_x['PL'], u_x['PVL'])
+            # Compute the fuzzy PID output
+            fuzzy_pid.compute()
 
-            # Control system and simulation
-            control_system = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, 
-                                                rule6, rule7, rule8, rule9, rule10, 
-                                                rule11, rule12, rule13, rule14, rule15, 
-                                                rule16, rule17, rule18, rule19, rule20, 
-                                                rule21, rule22, rule23, rule24, rule25])
-
-            fuzzy_sim = ctrl.ControlSystemSimulation(control_system)
-
-            # Test with sample inputs
-            fuzzy_sim.input['e_x'] = error
-            fuzzy_sim.input['de_x'] = error_diff
-           
-            # Compute output using centroid defuzzification
-            fuzzy_sim.compute()
-
-            print("Computed crisp output u_x:", fuzzy_sim.output['u_x'])
+            print("Computed crisp output u_x:", fuzzy_pid.output['u_x'])
             
             #Total control signal
             # output=output_Kp+self._i_coef*self._output_Ki +output_Kd  
-            output=fuzzy_sim.output['u_x']
+            output=fuzzy_pid.output['u_x']
 
             self._previous_error = error
         else:
             print("I am here")
             self._previous_error = error
             self._is_error_initialized = True
-            self._output_Ki = 0
+            self._integral_of_the_error = 0
             output=0
             if output > self._limit_out:
                 output = self._limit_out
