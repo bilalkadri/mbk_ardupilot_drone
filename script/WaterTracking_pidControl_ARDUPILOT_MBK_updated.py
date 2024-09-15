@@ -20,7 +20,8 @@ from mavros_msgs.msg import State
 import math
 import threading
 # from pid_controller_mbk import pid_controller
-from Fuzzy_Gain_Scheduled_Controller.fuzzy_pid_controller_mbk import fuzzy_pid_controller
+# from Fuzzy_Gain_Scheduled_Controller.fuzzy_pid_controller_mbk import fuzzy_pid_controller
+from Fuzzy_Gain_Scheduled_Controller.fuzzy_pid_controller_mbk_updated import FuzzyPIDController as fuzzy_pid_controller
 import matplotlib.pyplot as plt
 
 #-------------------------------------------------------
@@ -181,8 +182,8 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
         if distance_to_center > THRESHOLD_FOR_DISTANCE_TO_CENTER:
             # print("X_error : ", X_Error)
-            twist.twist.linear.y=0.1*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.x=0.1*controller_y.set_current_error(-Y_Error)
+            twist.twist.linear.y=0.1*controller_y.set_current_error(-X_Error)
+            twist.twist.linear.x=0.1*controller_x.set_current_error(-Y_Error)
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
             # print('RED: Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
 
@@ -343,20 +344,24 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
         # print('distance to center',distance_to_center)
         if distance_to_center > THRESHOLD_FOR_DISTANCE_TO_CENTER:
             twist.twist.linear.x=0.1*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
+            # twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
             # print('BLUE:Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
             twist.twist.angular.x=0
             twist.twist.angular.y=0
             twist.twist.angular.z=0 #controller_yaw.set_current_error(depth_Error)
         
-        
+            print(X_Error)
+            print(twist.twist.linear.x)
+            print(Y_Error)
         elif distance_to_center <THRESHOLD_FOR_DISTANCE_TO_CENTER:
 
             twist.twist.linear.x=0.1*controller_x.set_current_error(-X_Error)
-            twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
+            # twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
             # print('BLUE:Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
-
+            print(X_Error)
+            print(twist.twist.linear.x)
+            print(Y_Error)
             if Z_Error>1 and not(Water_Sucked_by_Syringes_local_variable):
                 twist.twist.linear.z=-2*controller_z.set_current_error(Z_Error)
                 # print('My Z_Error is greater than 0.1 and my z-position is=',Z_position)

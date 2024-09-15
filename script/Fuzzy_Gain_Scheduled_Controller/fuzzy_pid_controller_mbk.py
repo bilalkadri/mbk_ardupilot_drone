@@ -127,6 +127,23 @@ class fuzzy_pid_controller:
             fuzzy_pid = ctrl.ControlSystemSimulation(control_system)
 
             # Example simulation with some input values for error, derivative of error, and integral of error
+            # print('error length')
+            # print(len(error))
+            # print(error)
+            # for i in range(len(error)):
+            #     fuzzy_pid.input['error'] = error[i]
+            #     fuzzy_pid.input['d_error'] = error_diff[i]
+            #     fuzzy_pid.input['i_error'] = error_integration[i]
+
+            #     fuzzy_pid.compute()
+
+            #     print("Computed crisp output u_x:", fuzzy_pid.output['u_x'])
+                
+            #     #Total control signal
+            #     # output=output_Kp+self._i_coef*self._output_Ki +output_Kd  
+            #     output=fuzzy_pid.output['u_x']
+
+            #     self._previous_error = error
             fuzzy_pid.input['error'] = error
             fuzzy_pid.input['d_error'] = error_diff
             fuzzy_pid.input['i_error'] = error_integration
