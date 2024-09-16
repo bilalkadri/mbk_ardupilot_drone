@@ -4,7 +4,7 @@ import skfuzzy as fuzz
 import matplotlib.pyplot as plt
 from skfuzzy import control as ctrl
 
-class FuzzyPIDController:
+class fuzzy_pid_controller:
 
     def __init__(self, p_coef, i_coef, d_coef, limit_out):
         self._p_coef = p_coef

@@ -6,7 +6,7 @@ import control as ctl
 from fuzzy_pid_controller_mbk import fuzzy_pid_controller
 
 
-#Instantiatiung thr fuzzy controller
+#Instantiating thr fuzzy controller
 controller_x = fuzzy_pid_controller(1, 0.5, 0.05, 0.01)
 
 
@@ -25,7 +25,7 @@ G = ctl.TransferFunction([1], [T,T, 1])
 
 # Simulation parameters
 dt = 0.01  # Time step
-t = np.arange(0, 100, dt)  # Time vector
+t = np.arange(0, 200, dt)  # Time vector
 reference = np.ones_like(t)  # Step reference input
 
 # Initialize PID variables
@@ -39,8 +39,7 @@ control_signal_fuzzy_PID = []
 for i in range(len(t)):
     error = reference[i] - prev_output
     
-  
-    
+   
     
     # Proportional term
     P = Kp * error
@@ -80,8 +79,11 @@ for i in range(len(t)):
 
 
     # Update the system response (discrete first-order system)
+    
     time,response= ctl.forced_response(G, T=time_increment, U=input_signal)
-    prev_output = response[-1]
+  
+    print(response[1])
+    prev_output = response[1]
     # Save the current system response (last output)
     response_output.append(prev_output)
 #    _, prev_output, _ = ctl.forced_response(G, T=[0, dt], U=[prev_output, u_fuzzy_PID])
