@@ -87,7 +87,7 @@ class fuzzy_pid_controller:
             self.fuzzy_pid.compute()
 
             output_fuzzy = self.fuzzy_pid.output['output']
-            print("Computed crisp output u_x:", output_fuzzy)
+            # print("Computed crisp output u_x:", output_fuzzy)
 
             output = output_fuzzy
             self._previous_error = error_value
