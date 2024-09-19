@@ -1,5 +1,8 @@
-from fuzzy_pid_controller_mbk_updated2 import fuzzy_pid_controller
+
+from fuzzy_pid_controller_mbk_updated import fuzzy_pid_controller
+from fuzzy_pi_controller_mbk import fuzzy_pi_controller
 from pid_controller_mbk import pid_controller
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -8,7 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import control as ctl
 
-controller_x = fuzzy_pid_controller(0.6, .2, 0.1, 20)
+# controller_x = fuzzy_pid_controller(0.6, .2, 0.1, 20)
+controller_x = fuzzy_pi_controller(5, .9,  20)
 # controller_x=pid_controller(0.9, 0.9, 0.1, 20)
 
 # print("I am here")
