@@ -1,22 +1,48 @@
 import matplotlib.pyplot as plt
 import pickle
 
-def read_data():
-    f = open('/home/ugv/rtab_ws/src/mbk_ardupilot_drone/script/data.pickle', 'rb')
+file_path = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/'
+file_case1 = file_path + 'pid_LW_noNoise.pickle'
+file_case2 = file_path + 'pid_MW_noNoise.pickle'
+file_case3 = file_path + 'pid_HW_noNoise.pickle'
+
+logfile = file_case1
+
+
+def read_data(file):
+    f = open(file, 'rb')
     data = pickle.load(f)
     f.close()
 
     return data
 
-errors_dict = read_data()
+errors_dict_case1 = read_data(file_case1)
+errors_dict_case2 = read_data(file_case2)
+errors_dict_case3 = read_data(file_case3)
 
-blue_water_reservoir_pid_x_errors = errors_dict['blue_x_errors']
-blue_water_reservoir_pid_y_errors = errors_dict['blue_y_errors']
-blue_water_reservoir_pid_z_errors = errors_dict['blue_z_errors']
+# blue_water_reservoir_pid_x_errors = errors_dict['blue_x_errors']
+# blue_water_reservoir_pid_y_errors = errors_dict['blue_y_errors']
+# blue_water_reservoir_pid_z_errors = errors_dict['blue_z_errors']
+# blue_water_reservoir_sp_x = errors_dict['blue_x_sp']
+# blue_water_reservoir_sp_y = errors_dict['blue_y_sp']
+# blue_water_reservoir_sp_z = errors_dict['blue_z_sp']
+# blue_water_reservoir_xy_t = errors_dict['blue_xy_t']
+# blue_water_reservoir_z_t = errors_dict['blue_z_t']
 
-red_water_discharge_pid_x_errors = errors_dict['red_x_errors']
-red_water_discharge_pid_y_errors = errors_dict['red_y_errors']
-red_water_discharge_pid_z_errors = errors_dict['red_z_errors']
+# red_water_discharge_pid_x_errors = errors_dict['red_x_errors']
+# red_water_discharge_pid_y_errors = errors_dict['red_y_errors']
+# red_water_discharge_pid_z_errors = errors_dict['red_z_errors']
+# red_water_discharge_sp_x = errors_dict['red_x_sp']
+# red_water_discharge_sp_y = errors_dict['red_y_sp']
+# red_water_discharge_sp_z = errors_dict['red_z_sp']
+# red_water_discharge_xy_t = errors_dict['red_xy_t']
+# red_water_discharge_z_t = errors_dict['red_z_t']
+
+# # blue_t_min = min(min(blue_water_reservoir_xy_t),min(blue_water_reservoir_z_t))
+# # blue_t_max = max(max(blue_water_reservoir_xy_t),max(blue_water_reservoir_z_t))
+
+# red_t_min = min(min(red_water_discharge_xy_t),min(red_water_discharge_z_t))
+# red_t_max = max(max(red_water_discharge_xy_t),max(red_water_discharge_z_t))
 
 ####### To plot all errors on a separate figure #######
 
@@ -73,23 +99,40 @@ red_water_discharge_pid_z_errors = errors_dict['red_z_errors']
 # Create a figure with three subplots
 fig1, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8))
 
+min_x = min(min(errors_dict_case1['blue_xy_t']),min(errors_dict_case2['blue_xy_t']),min(errors_dict_case3['blue_xy_t']),
+            min(errors_dict_case1['blue_z_t']),min(errors_dict_case2['blue_z_t']),min(errors_dict_case3['blue_z_t']))
+max_x = max(max(errors_dict_case1['blue_xy_t']),max(errors_dict_case2['blue_xy_t']),max(errors_dict_case3['blue_xy_t']),
+            max(errors_dict_case1['blue_z_t']),max(errors_dict_case2['blue_z_t']),max(errors_dict_case3['blue_z_t']))
+
 # Plot blue_errors on the first subplot
-ax1.plot(blue_water_reservoir_pid_x_errors, color='blue')
+ax1.plot(errors_dict_case1['blue_xy_t'], errors_dict_case1['blue_x_errors'], label='Low Wind No Noise', color='green')
+ax1.plot(errors_dict_case2['blue_xy_t'], errors_dict_case2['blue_x_errors'], label='Med Wind No Noise', color='blue')
+ax1.plot(errors_dict_case3['blue_xy_t'], errors_dict_case3['blue_x_errors'], label='High Wind No Noise', color='red')
+ax1.set_xlim(min_x, max_x)
 ax1.set_title('Blue Water Reservoir X Errors')
 ax1.set_xlabel('Time (s)')
 ax1.set_ylabel('Error')
+ax1.legend()
 ax1.grid(True)
 
-ax2.plot(blue_water_reservoir_pid_y_errors, color='blue')
+ax2.plot(errors_dict_case1['blue_xy_t'], errors_dict_case1['blue_y_errors'], label='Low Wind No Noise', color='green')
+ax2.plot(errors_dict_case2['blue_xy_t'], errors_dict_case2['blue_y_errors'], label='Med Wind No Noise', color='blue')
+ax2.plot(errors_dict_case3['blue_xy_t'], errors_dict_case3['blue_y_errors'], label='High Wind No Noise', color='red')
+ax2.set_xlim(min_x, max_x)
 ax2.set_title('Blue Water Reservoir Y Errors')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Error')
+ax2.legend()
 ax2.grid(True)
 
-ax3.plot(blue_water_reservoir_pid_z_errors, color='blue')
+ax3.plot(errors_dict_case1['blue_z_t'], errors_dict_case1['blue_z_errors'], label='Low Wind No Noise', color='green')
+ax3.plot(errors_dict_case2['blue_z_t'], errors_dict_case2['blue_z_errors'], label='Med Wind No Noise', color='blue')
+ax3.plot(errors_dict_case3['blue_z_t'], errors_dict_case3['blue_z_errors'], label='High Wind No Noise', color='red')
+ax3.set_xlim(min_x, max_x)
 ax3.set_title('Blue Water Reservoir Z Errors')
 ax3.set_xlabel('Time (s)')
 ax3.set_ylabel('Error')
+ax3.legend()
 ax3.grid(True)
 
 # Adjust layout and display the plot
@@ -99,22 +142,39 @@ plt.show(block=False)
 # Create a figure with three subplots
 fig2, (rax1, rax2, rax3) = plt.subplots(3, 1, figsize=(10, 8))
 
-rax1.plot(red_water_discharge_pid_x_errors, color='red')
+min_xx = min(min(errors_dict_case1['red_xy_t']),min(errors_dict_case2['red_xy_t']),min(errors_dict_case3['red_xy_t']),
+            min(errors_dict_case1['red_z_t']),min(errors_dict_case2['red_z_t']),min(errors_dict_case3['red_z_t']))
+max_xx = max(max(errors_dict_case1['red_xy_t']),max(errors_dict_case2['red_xy_t']),max(errors_dict_case3['red_xy_t']),
+            max(errors_dict_case1['red_z_t']),max(errors_dict_case2['red_z_t']),max(errors_dict_case3['red_z_t']))
+
+rax1.plot(errors_dict_case1['red_xy_t'], errors_dict_case1['red_x_errors'], label='Low Wind No Noise', color='green')
+rax1.plot(errors_dict_case2['red_xy_t'], errors_dict_case2['red_x_errors'], label='Med Wind No Noise', color='blue')
+rax1.plot(errors_dict_case3['red_xy_t'], errors_dict_case3['red_x_errors'], label='High Wind No Noise', color='red')
+rax1.set_xlim(min_xx, max_xx)
 rax1.set_title('Red Water Discharge X Errors')
 rax1.set_xlabel('Time (s)')
 rax1.set_ylabel('Error')
+rax1.legend()
 rax1.grid(True)
 
-rax2.plot(red_water_discharge_pid_y_errors, color='red')
+rax2.plot(errors_dict_case1['red_xy_t'], errors_dict_case1['red_y_errors'], label='Low Wind No Noise', color='green')
+rax2.plot(errors_dict_case2['red_xy_t'], errors_dict_case2['red_y_errors'], label='Med Wind No Noise', color='blue')
+rax2.plot(errors_dict_case3['red_xy_t'], errors_dict_case3['red_y_errors'], label='High Wind No Noise', color='red')
+rax2.set_xlim(min_xx, max_xx)
 rax2.set_title('Red Water Discharge Y Errors')
 rax2.set_xlabel('Time (s)')
 rax2.set_ylabel('Error')
+rax2.legend()
 rax2.grid(True)
 
-rax3.plot(red_water_discharge_pid_z_errors, color='red')
+rax3.plot(errors_dict_case1['red_z_t'], errors_dict_case1['red_z_errors'], label='Low Wind No Noise', color='green')
+rax3.plot(errors_dict_case2['red_z_t'], errors_dict_case2['red_z_errors'], label='Med Wind No Noise', color='blue')
+rax3.plot(errors_dict_case3['red_z_t'], errors_dict_case3['red_z_errors'], label='High Wind No Noise', color='red')
+rax3.set_xlim(min_xx, max_xx)
 rax3.set_title('Red Water Discharge Z Errors')
 rax3.set_xlabel('Time (s)')
 rax3.set_ylabel('Error')
+rax3.legend()
 rax3.grid(True)
 
 # Adjust layout and display the plot

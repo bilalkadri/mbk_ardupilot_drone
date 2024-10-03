@@ -30,8 +30,15 @@ import pickle
 # Kd (Derivative Gain)
 # limit (controller saturation limit)
 
+experiment_name = 'pid_HW_noNoise'
+log_file_location = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/' + experiment_name + '.pickle'
+
 THRESHOLD_FOR_DISTANCE_TO_CENTER=100
 HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK= 3.5
+
+global RED_ITERATIONS, BLUE_ITERATIONS
+RED_ITERATIONS = 0
+BLUE_ITERATIONS = 0
 
 controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
 controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
@@ -64,6 +71,8 @@ blue_water_reservoir_pid_z_errors = []
 blue_water_reservoir_sp_x = []
 blue_water_reservoir_sp_y = []
 blue_water_reservoir_sp_z = []
+blue_water_reservoir_xy_t = []
+blue_water_reservoir_z_t = []
 
 red_water_discharge_pid_x_errors = []
 red_water_discharge_pid_y_errors = []
@@ -71,13 +80,18 @@ red_water_discharge_pid_z_errors = []
 red_water_discharge_sp_x = []
 red_water_discharge_sp_y = []
 red_water_discharge_sp_z = []
+red_water_discharge_xy_t = []
+red_water_discharge_z_t = []
 
 log_data = {'blue_x_errors':[], 'blue_y_errors':[], 'blue_z_errors':[],
-            'red_x_errors':[], 'red_y_errors':[], 'red_z_errors':[]}
+            'red_x_errors':[], 'red_y_errors':[], 'red_z_errors':[],
+            'blue_x_sp':[], 'blue_y_sp':[], 'blue_z_sp':[],
+            'red_x_sp':[], 'red_y_sp':[], 'red_z_sp':[],
+            'blue_xy_t':[], 'blue_z_t':[], 'red_xy_t':[], 'red_z_t':[]}
 
-def write_to_log(data):
+def write_to_log(filename,data):
 
-    f = open('/home/ugv/rtab_ws/src/mbk_ardupilot_drone/script/data.pickle', 'wb')
+    f = open(filename, 'wb')
     pickle.dump(data, f)
     f.close()
 
@@ -116,6 +130,8 @@ def GPS_Position_Callback_function(data_recieve):
         
 def Water_Discharge_Detected_Callback_function(data_recieve):
     #RED
+    global RED_ITERATIONS
+    RED_ITERATIONS = RED_ITERATIONS + 1
     
     #print('Water Discharge detected')
     #print data_recieve.data[0]
@@ -134,9 +150,9 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
    
     Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter above the tank
 
-    red_water_discharge_pid_x_errors.append(X_Error)
-    red_water_discharge_pid_y_errors.append(Y_Error)
-    red_water_discharge_pid_z_errors.append(Z_Error)
+    # red_water_discharge_pid_x_errors.append(X_Error)
+    # red_water_discharge_pid_y_errors.append(Y_Error)
+    # red_water_discharge_pid_z_errors.append(Z_Error)
 
     # print('X Error',X_Error) 
     # print('Y Error',Y_Error) 
@@ -213,6 +229,12 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
             # print('RED: Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
 
+            red_water_discharge_pid_x_errors.append(-X_Error)
+            red_water_discharge_pid_y_errors.append(-Y_Error)
+            red_water_discharge_sp_x.append(setPointX)
+            red_water_discharge_sp_y.append(setPointY)
+            red_water_discharge_xy_t.append(RED_ITERATIONS)
+
             twist.twist.angular.x=0
             twist.twist.angular.y=0
             twist.twist.angular.z=0 #controller_yaw.set_current_error(depth_Error)
@@ -225,8 +247,19 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
         elif distance_to_center <THRESHOLD_FOR_DISTANCE_TO_CENTER:
             twist.twist.linear.x=0.1*controller_x.set_current_error(-Y_Error)
             twist.twist.linear.y=0.1*controller_y.set_current_error(-X_Error)
+
+            red_water_discharge_pid_x_errors.append(-Y_Error)
+            red_water_discharge_pid_y_errors.append(-X_Error)
+            red_water_discharge_sp_x.append(setPointX)
+            red_water_discharge_sp_y.append(setPointY)
+            red_water_discharge_xy_t.append(RED_ITERATIONS)
+
             if Z_Error>1 and not(Water_Released_by_Syringes_local_variable):
                 twist.twist.linear.z=-2*controller_z.set_current_error(Z_Error)
+
+                red_water_discharge_pid_z_errors.append(Z_Error)
+                red_water_discharge_sp_z.append(HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK)
+                red_water_discharge_z_t.append(RED_ITERATIONS)
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Released_by_Syringes_local_variable):
                 time.sleep(5)
@@ -243,6 +276,11 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
             #I have to move back the quadcopter to the previous height
             if (5-Z_position)>1 and Water_Released_by_Syringes_local_variable:
                 twist.twist.linear.z=2*controller_z.set_current_error(5-Z_position)
+
+                red_water_discharge_pid_z_errors.append(5-Z_position)
+                red_water_discharge_sp_z.append(5)
+                red_water_discharge_z_t.append(RED_ITERATIONS)
+
                 print('I am rising my Z_position is :',Z_position)
 
             #Adding a new condition here , the quadcopter was stuck after releasing the water
@@ -261,12 +299,17 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
         
         
         pub_move.publish(twist)
-        log_data.update({'red_x_errors':red_water_discharge_pid_x_errors, 'red_y_errors':red_water_discharge_pid_y_errors, 'red_z_errors':red_water_discharge_pid_z_errors})
-        write_to_log(log_data)
+        log_data.update({'red_x_errors':red_water_discharge_pid_x_errors, 'red_y_errors':red_water_discharge_pid_y_errors, 'red_z_errors':red_water_discharge_pid_z_errors,
+                        'red_x_sp':red_water_discharge_sp_x, 'red_y_sp':red_water_discharge_sp_y, 'red_z_sp':red_water_discharge_sp_z,
+                        'blue_xy_t':blue_water_reservoir_xy_t, 'blue_z_t':blue_water_reservoir_z_t, 'red_xy_t':red_water_discharge_xy_t, 'red_z_t':red_water_discharge_z_t})
+        write_to_log(log_file_location, log_data)
 
 
 
 def Water_Reservoir_Detected_Callback_function(data_recieve):
+
+    global BLUE_ITERATIONS
+    BLUE_ITERATIONS = BLUE_ITERATIONS + 1
     
     global counter_for_BLUE
     #print('Water Reservoir detected')
@@ -286,9 +329,9 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
    
     Z_Error=Z_position-HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK #Setpoint in z-direction for Quadcopter 
 
-    blue_water_reservoir_pid_x_errors.append(X_Error)
-    blue_water_reservoir_pid_y_errors.append(Y_Error)
-    blue_water_reservoir_pid_z_errors.append(Z_Error)
+    # blue_water_reservoir_pid_x_errors.append(X_Error)
+    # blue_water_reservoir_pid_y_errors.append(Y_Error)
+    # blue_water_reservoir_pid_z_errors.append(Z_Error)
 
 
     # BLUE_Data=[setPointX,currentX,X_Error,setPointY,currentY,Y_Error,Z_Error]
@@ -380,6 +423,14 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
             twist.twist.linear.z=0 #controller_z.set_current_error(depth_Error)
             # print('BLUE:Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
+
+            blue_water_reservoir_pid_x_errors.append(-X_Error)
+            blue_water_reservoir_pid_y_errors.append(Y_Error)
+            blue_water_reservoir_sp_x.append(setPointX)
+            blue_water_reservoir_sp_y.append(setPointY)
+            blue_water_reservoir_xy_t.append(BLUE_ITERATIONS)
+
+
             twist.twist.angular.x=0
             twist.twist.angular.y=0
             twist.twist.angular.z=0 #controller_yaw.set_current_error(depth_Error)
@@ -391,9 +442,19 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             twist.twist.linear.y=0.1*controller_y.set_current_error(Y_Error)
             # print('BLUE:Cond 1, X error ={0}  Y error ={1} Euclidean distance = {2}'.format(X_Error, Y_Error,distance_to_center))
 
+            blue_water_reservoir_pid_x_errors.append(-X_Error)
+            blue_water_reservoir_pid_y_errors.append(Y_Error)
+            blue_water_reservoir_sp_x.append(setPointX)
+            blue_water_reservoir_sp_y.append(setPointY)
+            blue_water_reservoir_xy_t.append(BLUE_ITERATIONS)
+
             if Z_Error>1 and not(Water_Sucked_by_Syringes_local_variable):
                 twist.twist.linear.z=-2*controller_z.set_current_error(Z_Error)
                 # print('My Z_Error is greater than 0.1 and my z-position is=',Z_position)
+
+                blue_water_reservoir_pid_z_errors.append(Z_Error)
+                blue_water_reservoir_sp_z.append(HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK)
+                blue_water_reservoir_z_t.append(BLUE_ITERATIONS)
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Sucked_by_Syringes_local_variable):
                 time.sleep(5)
@@ -406,6 +467,10 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             if (5-Z_position)>1 and Water_Sucked_by_Syringes_local_variable:
                 twist.twist.linear.z=2*controller_z.set_current_error(5-Z_position)
                 print('I am rising, my Z_position is :',Z_position)
+
+                blue_water_reservoir_pid_z_errors.append(5-Z_position)
+                blue_water_reservoir_sp_z.append(5)
+                blue_water_reservoir_z_t.append(BLUE_ITERATIONS)
             
 
             #Adding a new condition here , the quadcopter was stuck after sucking the water
@@ -434,8 +499,10 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
         # plt.show()
 
         pub_move.publish(twist)
-        log_data.update({'blue_x_errors':blue_water_reservoir_pid_x_errors, 'blue_y_errors':blue_water_reservoir_pid_y_errors, 'blue_z_errors':blue_water_reservoir_pid_z_errors})
-        write_to_log(log_data)
+        log_data.update({'blue_x_errors':blue_water_reservoir_pid_x_errors, 'blue_y_errors':blue_water_reservoir_pid_y_errors, 'blue_z_errors':blue_water_reservoir_pid_z_errors,
+                         'blue_x_sp':blue_water_reservoir_sp_x, 'blue_y_sp':blue_water_reservoir_sp_y, 'blue_z_sp':blue_water_reservoir_sp_z,
+                         'blue_xy_t':blue_water_reservoir_xy_t, 'blue_z_t':blue_water_reservoir_z_t, 'red_xy_t':red_water_discharge_xy_t, 'red_z_t':red_water_discharge_z_t})
+        write_to_log(log_file_location, log_data)
 
 
 def timeout():
