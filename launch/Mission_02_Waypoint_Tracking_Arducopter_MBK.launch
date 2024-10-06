@@ -28,7 +28,12 @@
 
 
 <!--PID Controller for Picking and Dropping Water-->
-<node pkg="mbk_ardupilot_drone" type="WaterTracking_pidControl_ARDUPILOT_MBK_updated.py" 
+<!-- <node pkg="mbk_ardupilot_drone" type="WaterTracking_pidControl_ARDUPILOT_MBK_updated.py" 
+  
+    name="MBK_Set_Flight_Modes_and_Tracking_PID_Controller" output="screen" >
+</node> -->
+
+<node pkg="mbk_ardupilot_drone" type="WaterTracking_Noisy_pidControl_ARDUPILOT_MBK_updated.py" 
   
     name="MBK_Set_Flight_Modes_and_Tracking_PID_Controller" output="screen" >
 </node>
