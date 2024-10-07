@@ -22,6 +22,7 @@ import threading
 from pid_controller_mbk import pid_controller
 import matplotlib.pyplot as plt
 import pickle
+from Fuzzy_Gain_Scheduled_Controller.fuzzy_pi_controller_mbk import fuzzy_pi_controller
 
 #-------------------------------------------------------
 #EXPLANATION OF THE pid_controller (Kp,Ki,Kd,limit) parameters
@@ -51,9 +52,13 @@ global RED_ITERATIONS, BLUE_ITERATIONS
 RED_ITERATIONS = 0
 BLUE_ITERATIONS = 0
 
-controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
-controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
-controller_y = pid_controller(0.01, .01, 2, 1) # global y, for copter looking at the shelf it is z
+controller_z = fuzzy_pi_controller(0.01, .01, 1) # global z, for copter looking at the shelf it is -x
+controller_x = fuzzy_pi_controller(0.01, .01, 1) # global x, for copter looking at the shelf it is y (or -y) 
+controller_y = fuzzy_pi_controller(0.01, .01, 1) # global y, for copter looking at the shelf it is z
+
+# controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
+# controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
+# controller_y = pid_controller(0.01, .01, 2, 1) # global y, for copter looking at the shelf it is z
 #controller_yaw = pd_controller(0.1, 0.5, 1.0) # global y, for copter looking at the shelf it is z
 
 
