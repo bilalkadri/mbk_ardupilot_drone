@@ -21,7 +21,7 @@ import math
 import threading
 # from pid_controller_mbk import pid_controller
 # from Fuzzy_Gain_Scheduled_Controller.fuzzy_pid_controller_mbk import fuzzy_pid_controller
-from Fuzzy_Gain_Scheduled_Controller.fuzzy_pid_controller_mbk_updated2 import fuzzy_pid_controller
+from Fuzzy_Gain_Scheduled_Controller.fuzzy_pi_controller_mbk import fuzzy_pi_controller
 import matplotlib.pyplot as plt
 
 #-------------------------------------------------------
@@ -34,9 +34,9 @@ import matplotlib.pyplot as plt
 THRESHOLD_FOR_DISTANCE_TO_CENTER=100
 HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK= 3.5
 
-controller_z = fuzzy_pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
-controller_x = fuzzy_pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
-controller_y = fuzzy_pid_controller(0.01, .01, 2, 1) # global y, for copter looking at the shelf it is z
+controller_z = fuzzy_pi_controller(0.01, .01, 1) # global z, for copter looking at the shelf it is -x
+controller_x = fuzzy_pi_controller(0.01, .01, 1) # global x, for copter looking at the shelf it is y (or -y) 
+controller_y = fuzzy_pi_controller(0.01, .01, 1) # global y, for copter looking at the shelf it is z
 #controller_yaw = pd_controller(0.1, 0.5, 1.0) # global y, for copter looking at the shelf it is z
 
 
