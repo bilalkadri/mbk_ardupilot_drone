@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 file_path = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/'
-file_name = 'pid_LW_HighNoise.pickle'
+file_name = 'flc_LW_noNoise.pickle'
 
 logfile = file_path + file_name
 

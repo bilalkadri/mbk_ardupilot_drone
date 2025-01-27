@@ -31,7 +31,7 @@ from Fuzzy_Gain_Scheduled_Controller.fuzzy_pi_controller_mbk import fuzzy_pi_con
 # Kd (Derivative Gain)
 # limit (controller saturation limit)
 
-experiment_name = 'pid_LW_HighNoise'
+experiment_name = 'flc_MW_noNoise'
 log_file_location = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/' + experiment_name + '.pickle'
 
 THRESHOLD_FOR_DISTANCE_TO_CENTER=100
@@ -45,16 +45,16 @@ z_low_noise_std = 0.005
 z_medium_noise_std = 0.025
 z_high_noise_std = 0.05
 
-xy_current_noise_std = xy_high_noise_std
-z_current_noise_std = z_high_noise_std
+xy_current_noise_std = 0
+z_current_noise_std = 0
  
 global RED_ITERATIONS, BLUE_ITERATIONS
 RED_ITERATIONS = 0
 BLUE_ITERATIONS = 0
 
-controller_z = fuzzy_pi_controller(0.01, .01, 1) # global z, for copter looking at the shelf it is -x
-controller_x = fuzzy_pi_controller(0.01, .01, 1) # global x, for copter looking at the shelf it is y (or -y) 
-controller_y = fuzzy_pi_controller(0.01, .01, 1) # global y, for copter looking at the shelf it is z
+controller_z = fuzzy_pi_controller(0.02, 0.02, 1) # global z, for copter looking at the shelf it is -x
+controller_x = fuzzy_pi_controller(0.02, 0.02, 1) # global x, for copter looking at the shelf it is y (or -y) 
+controller_y = fuzzy_pi_controller(0.02, 0.02, 1) # global y, for copter looking at the shelf it is z
 
 # controller_z = pid_controller(0.01, .01, 2, 1) # global z, for copter looking at the shelf it is -x
 # controller_x = pid_controller(0.01, .01, 2, 1) # global x, for copter looking at the shelf it is y (or -y) 
@@ -252,7 +252,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
             red_water_discharge_pid_y_errors.append(-Y_Error)
             red_water_discharge_sp_x.append(setPointX)
             red_water_discharge_sp_y.append(setPointY)
-            red_water_discharge_xy_t.append(RED_ITERATIONS)
+            red_water_discharge_xy_t.append(rospy.get_time())
 
             twist.twist.angular.x=0
             twist.twist.angular.y=0
@@ -271,14 +271,14 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
             red_water_discharge_pid_y_errors.append(-X_Error)
             red_water_discharge_sp_x.append(setPointX)
             red_water_discharge_sp_y.append(setPointY)
-            red_water_discharge_xy_t.append(RED_ITERATIONS)
+            red_water_discharge_xy_t.append(rospy.get_time())
 
             if Z_Error>1 and not(Water_Released_by_Syringes_local_variable):
-                twist.twist.linear.z=-2*controller_z.set_current_error(Z_Error)
+                twist.twist.linear.z=-0.5*controller_z.set_current_error(Z_Error)
 
                 red_water_discharge_pid_z_errors.append(Z_Error)
                 red_water_discharge_sp_z.append(HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK)
-                red_water_discharge_z_t.append(RED_ITERATIONS)
+                red_water_discharge_z_t.append(rospy.get_time())
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Released_by_Syringes_local_variable):
                 time.sleep(5)
@@ -298,7 +298,7 @@ def Water_Discharge_Detected_Callback_function(data_recieve):
 
                 red_water_discharge_pid_z_errors.append(5-Z_position)
                 red_water_discharge_sp_z.append(5)
-                red_water_discharge_z_t.append(RED_ITERATIONS)
+                red_water_discharge_z_t.append(rospy.get_time())
 
                 print('I am rising my Z_position is :',Z_position)
 
@@ -447,7 +447,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             blue_water_reservoir_pid_y_errors.append(Y_Error)
             blue_water_reservoir_sp_x.append(setPointX)
             blue_water_reservoir_sp_y.append(setPointY)
-            blue_water_reservoir_xy_t.append(BLUE_ITERATIONS)
+            blue_water_reservoir_xy_t.append(rospy.get_time())
 
 
             twist.twist.angular.x=0
@@ -465,7 +465,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
             blue_water_reservoir_pid_y_errors.append(Y_Error)
             blue_water_reservoir_sp_x.append(setPointX)
             blue_water_reservoir_sp_y.append(setPointY)
-            blue_water_reservoir_xy_t.append(BLUE_ITERATIONS)
+            blue_water_reservoir_xy_t.append(rospy.get_time())
 
             if Z_Error>1 and not(Water_Sucked_by_Syringes_local_variable):
                 twist.twist.linear.z=-2*controller_z.set_current_error(Z_Error)
@@ -473,7 +473,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
 
                 blue_water_reservoir_pid_z_errors.append(Z_Error)
                 blue_water_reservoir_sp_z.append(HEIGHT_TO_BE_MAINTAINED_ABOVE_THE_TANK)
-                blue_water_reservoir_z_t.append(BLUE_ITERATIONS)
+                blue_water_reservoir_z_t.append(rospy.get_time())
             
             elif Z_Error>0 and Z_Error <=1 and not(Water_Sucked_by_Syringes_local_variable):
                 time.sleep(5)
@@ -489,7 +489,7 @@ def Water_Reservoir_Detected_Callback_function(data_recieve):
 
                 blue_water_reservoir_pid_z_errors.append(5-Z_position)
                 blue_water_reservoir_sp_z.append(5)
-                blue_water_reservoir_z_t.append(BLUE_ITERATIONS)
+                blue_water_reservoir_z_t.append(rospy.get_time())
             
 
             #Adding a new condition here , the quadcopter was stuck after sucking the water

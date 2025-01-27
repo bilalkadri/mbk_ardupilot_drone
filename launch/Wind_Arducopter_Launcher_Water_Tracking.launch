@@ -4,6 +4,7 @@
   <!--<include file="$(find mbk_ardupilot_drone)/launch/empty_world.launch"/>-->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find mbk_ardupilot_drone)/worlds/teknofest_world_with_wind.world"/>
+    <arg name="use_sim_time" value="true" />
     <!-- more default parameters can be changed here -->
   </include>
 

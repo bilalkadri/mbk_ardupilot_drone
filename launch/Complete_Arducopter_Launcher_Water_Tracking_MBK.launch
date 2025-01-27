@@ -8,7 +8,7 @@
   </include>
 
 <!--to start MAVROS-->
-<include file="$(find iq_sim)/launch/apm.launch" />
+<include file="$(find mbk_ardupilot_drone)/launch/apm.launch" />
 
 <!--TO START MAVLPROXY , the basic Ground Control Station (GCS)-->
 <node pkg="mbk_ardupilot_drone" type="startsitl.sh" name="mavproxy_bash_file_by_mbk" output="screen" >

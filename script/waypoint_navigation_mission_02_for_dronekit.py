@@ -42,6 +42,8 @@ def set_destination(lat, lon, alt, wp_index):
     aLocation = LocationGlobalRelative(lat, lon, float(alt))
     
     # goto_position_target_global_int(aLocation)
+    vehicle.groundspeed = 1
+    vehicle.airspeed = 1
     vehicle.simple_goto(aLocation)
     dist_to_wp = dist_between_global_coordinates(vehicle.location.global_frame, aLocation) 
     
@@ -114,6 +116,9 @@ def arm_and_takeoff(aTargetAltitude):
             print("Reached target altitude")
             break
         time.sleep(1)
+
+    vehicle.groundspeed = 1
+    vehicle.airspeed = 1
 
 
 def main():
@@ -279,6 +284,8 @@ def main():
         # elif not(condition):
         #     print('I am executing waypoint number :{0}'.format(i))
         if condition:
+            vehicle.groundspeed = 1
+            vehicle.airspeed = 1
             x=waypoints_lap_02[i][0]
             y=waypoints_lap_02[i][1]
             z=waypoints_lap_02[i][2] 
