@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import pickle
+import numpy as np
 
-file_path = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/'
+# file_path= 'C:\Users\bilal\Dropbox\My Research Publications\Journal\Submitted for peer review\JP 01 (PeerJ, MBK, Drone Architecture)\mbk_ardupilot_drone\experiment_results'
+file_path= 'C:\\Users\\bilal\\Dropbox\\My Research Publications\\Journal\\Submitted for peer review\\JP 01 (PeerJ, MBK, Drone Architecture)\\mbk_ardupilot_drone\\experiment_results\\'
+#file_path = '/home/ugv/rtab_ws/src/mbk_ardupilot_drone/experiment_results/'
 file_case1 = file_path + 'pid_LW_noNoise.pickle'
 file_case2 = file_path + 'pid_MW_noNoise.pickle'
 file_case3 = file_path + 'pid_HW_noNoise.pickle'
@@ -104,6 +107,9 @@ rax3.grid(True)
 # Adjust layout and display the plot
 plt.tight_layout()
 plt.show(block=False)
+
+
+
 
 # Keep the plots open
 input("Press Enter to close the plots...")
